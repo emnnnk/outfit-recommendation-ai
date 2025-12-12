@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧥 Akıllı Kıyafet Öneri Sistemi</title>
+    <meta name="description" content="ML ve Kural Tabanlı Hibrit Kıyafet Öneri Motoru - Gerçek Zamanlı Hava Durumu">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <!-- City Background Image -->
+    <div id="city-background" class="city-bg"></div>
+    <div class="city-overlay"></div>
+
+    <!-- Animated Weather Background -->
+    <canvas id="weather-canvas"></canvas>
+
+    <!-- Floating Particles -->
+    <div class="particles-container">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- Glowing Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="logo">
+                <span class="logo-icon">🧥</span>
+                <span class="logo-text">Akıllı Kıyafet Öneri</span>
+            </h1>
+            <p class="tagline">ML & Kural Tabanlı Hibrit Öneri Motoru | Gerçek Zamanlı Hava Durumu</p>
+
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-icon">🤖</span>
+                    <span class="stat-label">ML Model</span>
+                    <span class="stat-value">Aktif</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">📊</span>
+                    <span class="stat-label">Doğruluk</span>
+                    <span class="stat-value">%95+</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">👔</span>
+                    <span class="stat-label">Kıyafet</span>
+                    <span class="stat-value">12+</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">🌍</span>
+                    <span class="stat-label">Şehir</span>
+                    <span class="stat-value">25</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="main-grid">
+            <!-- Left Panel: Weather & Settings -->
+            <div class="left-panel">
+                <!-- Weather Card -->
+                <div class="glass-card weather-card" id="weather-card">
+                    <div class="card-header">
+                        <span class="card-icon">🌤️</span>
+                        <h2>Canlı Hava Durumu</h2>
+                    </div>
+
+                    <!-- Live Date/Time -->
+                    <div class="live-datetime">
+                        <div class="datetime-row">
+                            <span class="datetime-icon">📅</span>
+                            <span id="live-date" class="datetime-value">--</span>
+                        </div>
+                        <div class="datetime-row">
+                            <span class="datetime-icon">🕐</span>
+                            <span id="live-time" class="datetime-value">--:--</span>
+                        </div>
+                        <div class="datetime-row">
+                            <span class="datetime-icon">🗓️</span>
+                            <span id="live-season" class="datetime-value season-badge">--</span>
+                        </div>
+                    </div>
+
+                    <div class="city-selector">
+                        <label for="city-select">📍 Şehir Seçin</label>
+                        <select id="city-select" class="select-input">
+                            {% for city in cities %}
+                            <option value="{{ city }}" {% if loop.first %}selected{% endif %}>{{ city }}</option>
+                            {% endfor %}
+                        </select>
+                        <button id="fetch-weather-btn" class="btn btn-secondary">
+                            <span class="btn-icon">🔄</span>
+                            Güncelle
+                        </button>
+                    </div>
+
+                    <div id="weather-display" class="weather-display hidden">
+                        <div class="weather-main">
+                            <span id="weather-emoji" class="weather-emoji">☀️</span>
+                            <div class="weather-temp-container">
+                                <span id="weather-temp" class="weather-temp">--</span>
+                                <span class="weather-unit">°C</span>
+                            </div>
+                        </div>
+                        <p id="weather-desc" class="weather-desc">--</p>
+                        <div class="weather-details">
+                            <div class="weather-detail">
+                                <span class="detail-icon">🌡️</span>
+                                <span class="detail-label">Hissedilen</span>
+                                <span id="feels-like" class="detail-value">--°C</span>
+                            </div>
+                            <div class="weather-detail">
+                                <span class="detail-icon">💧</span>
+                                <span class="detail-label">Nem</span>
+                                <span id="humidity" class="detail-value">--%</span>
+                            </div>
+                            <div class="weather-detail">
+                                <span class="detail-icon">💨</span>
+                                <span class="detail-label">Rüzgar</span>
+                                <span id="wind-speed" class="detail-value">-- m/s</span>
+                            </div>
+                            <div class="weather-detail">
+                                <span class="detail-icon">🌧️</span>
+                                <span class="detail-label">Yağış</span>
+                                <span id="rain-status" class="detail-value">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="weather-loading" class="weather-loading">
+                        <div class="spinner"></div>
+                        <p>Hava durumu yükleniyor...</p>
+                    </div>
+
+                    <div id="weather-placeholder" class="weather-placeholder">
+                        <span class="placeholder-icon">🌍</span>
+                        <p>Hava durumunu görmek için şehir seçin ve "Güncelle" butonuna tıklayın</p>
+                    </div>
+                </div>
+
+                <!-- Manual Settings Card -->
+                <div class="glass-card settings-card">
+                    <div class="card-header">
+                        <span class="card-icon">⚙️</span>
+                        <h2>Manuel Ayarlar</h2>
+                    </div>
+
+                    <div class="settings-grid">
+                        <div class="setting-item">
+                            <label for="temp-slider">🌡️ Sıcaklık: <span id="temp-value">20</span>°C</label>
+                            <input type="range" id="temp-slider" min="-20" max="45" value="20" class="slider">
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="rain-select">🌧️ Yağmur</label>
+                            <select id="rain-select" class="select-input">
+                                <option value="yok">Yok ☀️</option>
+                                <option value="var">Var 🌧️</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="wind-select">💨 Rüzgar</label>
+                            <select id="wind-select" class="select-input">
+                                <option value="zayıf">Zayıf 🍃</option>
+                                <option value="orta">Orta 💨</option>
+                                <option value="kuvvetli">Kuvvetli 🌪️</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="occasion-select">📍 Ortam</label>
+                            <select id="occasion-select" class="select-input">
+                                <option value="günlük">Günlük 🏠</option>
+                                <option value="okul">Okul 🎒</option>
+                                <option value="özel">Özel Gün 👔</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="season-select">🗓️ Mevsim</label>
+                            <select id="season-select" class="select-input">
+                                <option value="ilkbahar">İlkbahar 🌸</option>
+                                <option value="yaz">Yaz ☀️</option>
+                                <option value="sonbahar">Sonbahar 🍂</option>
+                                <option value="kış">Kış ❄️</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Panel: Outfit Display -->
+            <div class="center-panel">
+                <div class="glass-card mannequin-card">
+                    <div class="card-header">
+                        <span class="card-icon">👔</span>
+                        <h2>Kıyafet Görünümü</h2>
+                    </div>
+
+                    <div class="mannequin-container">
+                        <!-- Main Outfit Display -->
+                        <div class="outfit-display" id="outfit-display">
+                            <div class="outfit-image-wrapper">
+                                <img id="outfit-image" src="/static/images/outfits/tisort.png" alt="Kıyafet"
+                                    class="outfit-image">
+                                <div class="outfit-glow"></div>
+                            </div>
+
+                            <!-- Accessory Badge -->
+                            <div class="accessory-badge" id="accessory-badge"></div>
+                        </div>
+
+                        <!-- Outfit Info -->
+                        <div class="outfit-info" id="outfit-info">
+                            <span class="outfit-emoji-large" id="outfit-emoji">👕</span>
+                            <div class="outfit-text">
+                                <span class="outfit-name" id="outfit-name">Tişört</span>
+                                <span class="outfit-desc" id="outfit-desc">Kıyafet önermek için butona tıklayın</span>
+                            </div>
+                        </div>
+
+                        <!-- Weather Summary Bar -->
+                        <div class="weather-bar" id="weather-bar">
+                            <div class="weather-bar-item">
+                                <span class="bar-icon">🌡️</span>
+                                <span class="bar-value" id="bar-temp">--°C</span>
+                            </div>
+                            <div class="weather-bar-item">
+                                <span class="bar-icon">🌧️</span>
+                                <span class="bar-value" id="bar-rain">--</span>
+                            </div>
+                            <div class="weather-bar-item">
+                                <span class="bar-icon">💨</span>
+                                <span class="bar-value" id="bar-wind">--</span>
+                            </div>
+                            <div class="weather-bar-item">
+                                <span class="bar-icon">🗓️</span>
+                                <span class="bar-value" id="bar-season">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Predict Button -->
+                    <button id="predict-btn" class="btn btn-primary btn-large">
+                        <span class="btn-icon">🎯</span>
+                        <span class="btn-text">Kıyafet Öner</span>
+                        <div class="btn-shine"></div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel: Results -->
+            <div class="right-panel">
+                <!-- ML Prediction Card -->
+                <div class="glass-card result-card ml-card" id="ml-result-card">
+                    <div class="card-header">
+                        <span class="card-icon">🤖</span>
+                        <h2>ML Model Tahmini</h2>
+                    </div>
+
+                    <div class="result-content" id="ml-result">
+                        <div class="result-placeholder">
+                            <span class="placeholder-icon">🧠</span>
+                            <p>Tahmin bekleniyor...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rule-based Prediction Card -->
+                <div class="glass-card result-card rule-card" id="rule-result-card">
+                    <div class="card-header">
+                        <span class="card-icon">📋</span>
+                        <h2>Kural Tabanlı</h2>
+                    </div>
+
+                    <div class="result-content" id="rule-result">
+                        <div class="result-placeholder">
+                            <span class="placeholder-icon">📖</span>
+                            <p>Tahmin bekleniyor...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Match Status -->
+                <div class="glass-card match-card" id="match-card">
+                    <div id="match-status" class="match-status">
+                        <span class="match-icon">⏳</span>
+                        <span class="match-text">Karşılaştırma bekleniyor</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>🎓 <strong>Outfit AI</strong> - Makine Öğrenimi Projesi</p>
+            <p class="footer-sub">Decision Tree, Random Forest & Gradient Boosting ile Hibrit Öneri Sistemi</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/weather-bg.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/mannequin.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>
