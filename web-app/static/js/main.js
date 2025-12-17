@@ -45,6 +45,10 @@ class OutfitApp {
         this.outfitsPlaceholder = document.getElementById('outfits-placeholder');
         this.outfitsGrid = document.getElementById('outfits-grid');
 
+        this.sidebarToggle = document.getElementById('sidebar-toggle');
+        this.drawerBackdrop = document.getElementById('drawer-backdrop');
+        this.topbarGenerate = document.getElementById('topbar-generate');
+
         // State
         this.weatherData = null;
         this.isLoading = false;
@@ -56,6 +60,8 @@ class OutfitApp {
         this.hideOutfitsLoading();
 
         this.fetchModelMetrics();
+
+        this.applyInitialSidebarState();
     }
 
     bindEvents() {
@@ -81,6 +87,24 @@ class OutfitApp {
 
         // Predict button
         this.predictBtn.addEventListener('click', () => this.predict());
+
+        if (this.topbarGenerate) {
+            this.topbarGenerate.addEventListener('click', () => this.predict());
+        }
+
+        if (this.sidebarToggle) {
+            this.sidebarToggle.addEventListener('click', () => this.toggleSidebar());
+        }
+
+        if (this.drawerBackdrop) {
+            this.drawerBackdrop.addEventListener('click', () => this.closeSidebar());
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeSidebar();
+            }
+        });
 
         if (this.modelSelect) {
             this.modelSelect.addEventListener('change', () => {
@@ -309,6 +333,7 @@ class OutfitApp {
                 this.displayResults(result);
                 this.displayOutfits(result.outfits);
                 this.displaySelectedPrediction(result.selected_prediction, result);
+                this.showToast('Öneriler hazır', 'success');
             } else {
                 this.showError('Tahmin yapılamadı: ' + result.error);
                 this.showOutfitsError('Tahmin yapılamadı: ' + result.error);
@@ -431,29 +456,36 @@ class OutfitApp {
         this.outfitsGrid.classList.remove('hidden');
 
         const cardsHtml = outfits
-            .map((o) => {
-                const title = this.escapeHtml(o.title || 'Outfit');
+            .map((o, idx) => {
+                const title = this.escapeHtml(o.title || `Outfit #${idx + 1}`);
                 const reasons = Array.isArray(o.reasons) ? o.reasons : [];
                 const pieces = Array.isArray(o.pieces) ? o.pieces : [];
 
-                const reasonsHtml = reasons
-                    .slice(0, 5)
-                    .map((r) => `<li>${this.escapeHtml(r)}</li>`)
+                const hero = this.escapeHtml(this.getBoardImageUrl(o, idx));
+                const heroOnError = this.imgOnErrorTo(this.defaultBoardImage());
+
+                const chipsHtml = reasons
+                    .slice(0, 4)
+                    .map((r) => `<span class="chip">${this.escapeHtml(r)}</span>`)
                     .join('');
 
                 const piecesHtml = pieces
                     .map((p) => {
                         const label = this.escapeHtml(p.label || p.category || 'Parça');
+                        const category = this.escapeHtml(p.category || '');
                         const img = this.escapeHtml(p.image || '');
                         const link = this.escapeHtml(p.link || '#');
+                        const onError = this.imgOnErrorTo(this.defaultPieceImage());
+
                         return `
-                            <div class="piece-item">
-                                <div class="piece-image">
-                                    <img src="${img}" alt="${label}" loading="lazy" />
-                                </div>
-                                <div class="piece-meta">
-                                    <div class="piece-label">${label}</div>
-                                    <a class="piece-link" href="${link}" target="_blank" rel="noopener noreferrer">Shop</a>
+                            <div class="piece-mini">
+                                <img src="${img}" alt="${label}" loading="lazy" ${onError} />
+                                <div>
+                                    <div class="piece-mini-title">${label}</div>
+                                    <div class="piece-mini-meta">
+                                        <span class="piece-mini-cat">${category}</span>
+                                        <a class="shop-mini" href="${link}" target="_blank" rel="noopener noreferrer" aria-label="Shop">🛒</a>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -461,18 +493,87 @@ class OutfitApp {
                     .join('');
 
                 return `
-                    <div class="outfit-card">
-                        <div class="outfit-card-header">
-                            <div class="outfit-card-title">${title}</div>
+                    <article class="pin-card">
+                        <div class="pin-hero">
+                            <img src="${hero}" alt="${title}" loading="lazy" ${heroOnError} />
                         </div>
-                        <ul class="outfit-reasons">${reasonsHtml}</ul>
-                        <div class="pieces-grid">${piecesHtml}</div>
-                    </div>
+                        <div class="pin-body">
+                            <div class="pin-title">${title}</div>
+                            <div class="chip-row">${chipsHtml}</div>
+                            <details class="pieces-details">
+                                <summary>
+                                    <span>Pieces</span>
+                                    <span style="opacity:0.7">⌄</span>
+                                </summary>
+                                <div class="pieces-row">${piecesHtml}</div>
+                            </details>
+                        </div>
+                    </article>
                 `;
             })
             .join('');
 
         this.outfitsGrid.innerHTML = cardsHtml;
+    }
+
+    applyInitialSidebarState() {
+        const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+        if (isMobile) {
+            document.body.classList.remove('sidebar-open');
+        }
+    }
+
+    toggleSidebar() {
+        document.body.classList.toggle('sidebar-open');
+    }
+
+    closeSidebar() {
+        const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+        if (isMobile) {
+            document.body.classList.remove('sidebar-open');
+        }
+    }
+
+    defaultBoardImage() {
+        return '/static/images/boards/default.svg';
+    }
+
+    defaultPieceImage() {
+        return '/static/images/boards/piece.svg';
+    }
+
+    imgOnErrorTo(url) {
+        const safe = this.escapeHtml(url);
+        return `onerror="this.onerror=null;this.src='${safe}';"`;
+    }
+
+    getBoardImageUrl(outfit, idx) {
+        if (outfit && outfit.board_image) {
+            return String(outfit.board_image);
+        }
+
+        const temp = parseInt(this.tempSlider?.value || '20', 10);
+        const rain = this.rainSelect?.value || 'yok';
+        const style = this.styleSelect?.value || '';
+        const eventType = this.eventTypeSelect?.value || '';
+
+        let key = 'default';
+        if (rain === 'var') key = 'rainy';
+        else if (temp <= 8) key = 'winter';
+        else if (temp >= 28) key = 'summer';
+        else if (eventType === 'work' || eventType === 'meeting') key = 'business';
+        else if (eventType === 'date') key = 'date';
+        else if (eventType === 'outdoors') key = 'outdoors';
+        else if (eventType === 'class') key = 'class';
+        else if (eventType === 'sport') key = 'sporty';
+        else if (style === 'street') key = 'street';
+        else if (style === 'classic') key = 'classic';
+        else if (style === 'minimalist') key = 'minimalist';
+        else if (style === 'formal') key = 'formal';
+
+        const variants = [key];
+        const pick = variants[idx % variants.length] || key;
+        return `/static/images/boards/${pick}.svg`;
     }
 
     // Format outfit name for display
@@ -651,7 +752,26 @@ class OutfitApp {
         if (this.outfitsLoading) this.outfitsLoading.classList.remove('hidden');
         if (this.outfitsError) this.outfitsError.classList.add('hidden');
         if (this.outfitsPlaceholder) this.outfitsPlaceholder.classList.add('hidden');
-        if (this.outfitsGrid) this.outfitsGrid.classList.add('hidden');
+        if (this.outfitsGrid) {
+            this.outfitsGrid.classList.remove('hidden');
+            this.outfitsGrid.innerHTML = this.renderOutfitSkeletons(6);
+        }
+    }
+
+    renderOutfitSkeletons(n) {
+        const cards = Array.from({ length: n }).map(() => {
+            return `
+                <article class="pin-card pin-skeleton">
+                    <div class="pin-hero"></div>
+                    <div class="pin-body">
+                        <div class="skeleton-line" style="width: 70%"></div>
+                        <div class="skeleton-line" style="width: 95%"></div>
+                        <div class="skeleton-line" style="width: 80%"></div>
+                    </div>
+                </article>
+            `;
+        });
+        return cards.join('');
     }
 
     hideOutfitsLoading() {

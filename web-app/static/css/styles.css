@@ -91,6 +91,11 @@ body {
     position: relative;
 }
 
+body:not(.sidebar-open) .drawer-backdrop {
+    opacity: 0;
+    pointer-events: none;
+}
+
 /* Animated Background Gradient */
 body::before {
     content: '';
@@ -139,6 +144,108 @@ body::before {
     margin: 0 auto;
     padding: var(--spacing-xl);
     min-height: 100vh;
+}
+
+.topbar {
+    position: sticky;
+    top: var(--spacing-lg);
+    z-index: 10;
+    display: grid;
+    grid-template-columns: 44px 1fr 160px;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: 10px 12px;
+    margin-bottom: var(--spacing-xl);
+    border-radius: 18px;
+    background: rgba(10, 10, 26, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.icon-btn {
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.icon-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.10);
+}
+
+.hamburger {
+    width: 18px;
+    height: 12px;
+    position: relative;
+    display: inline-block;
+}
+
+.hamburger::before,
+.hamburger::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 999px;
+}
+
+.hamburger::before {
+    top: 0;
+    box-shadow: 0 5px 0 rgba(255, 255, 255, 0.85);
+}
+
+.hamburger::after {
+    bottom: 0;
+}
+
+.topbar-brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.topbar-title {
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.topbar-cta {
+    justify-self: end;
+    padding: 10px 14px;
+}
+
+.drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+    pointer-events: none;
+    z-index: 9;
+}
+
+.legacy-header {
+    display: none;
 }
 
 /* City Background */
@@ -260,11 +367,28 @@ body::before {
     animation: fadeIn 1s ease;
 }
 
+body:not(.sidebar-open) .main-grid {
+    grid-template-columns: 0px minmax(0, 1fr);
+}
+
 .sidebar {
     position: sticky;
     top: var(--spacing-xl);
     align-self: start;
     height: fit-content;
+}
+
+body:not(.sidebar-open) .sidebar {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-16px);
+    transition: opacity var(--transition-normal), transform var(--transition-normal);
+}
+
+body.sidebar-open .sidebar {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity var(--transition-normal), transform var(--transition-normal);
 }
 
 .sidebar-card {
@@ -1180,6 +1304,169 @@ body::before {
     color: var(--text-secondary);
 }
 
+/* Outfit Recommendations - Pinterest Board */
+.outfits-card {
+    padding: var(--spacing-xl);
+}
+
+.outfits-grid {
+    display: block;
+    column-count: 3;
+    column-gap: var(--spacing-xl);
+}
+
+.pin-card {
+    break-inside: avoid;
+    margin: 0 0 var(--spacing-xl);
+    border-radius: 18px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: var(--shadow-md);
+    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.pin-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+}
+
+.pin-hero {
+    position: relative;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.pin-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.pin-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.00) 0%, rgba(0,0,0,0.18) 55%, rgba(0,0,0,0.40) 100%);
+}
+
+.pin-body {
+    padding: 14px 14px 12px;
+}
+
+.pin-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+}
+
+.chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.chip {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    line-height: 1;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-secondary);
+}
+
+.pieces-details {
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+    padding-top: 10px;
+}
+
+.pieces-details > summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.pieces-details > summary::-webkit-details-marker {
+    display: none;
+}
+
+.pieces-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.piece-mini {
+    display: grid;
+    grid-template-columns: 84px 1fr;
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.piece-mini img {
+    width: 84px;
+    height: 84px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.piece-mini-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.piece-mini-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.piece-mini-cat {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.shop-mini {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.pin-skeleton {
+    position: relative;
+    overflow: hidden;
+}
+
+.pin-skeleton .pin-body .skeleton-line {
+    height: 12px;
+}
+
 /* Match Card */
 .match-card {
     background: rgba(255, 255, 255, 0.02);
@@ -1362,6 +1649,10 @@ body::before {
     .match-card {
         grid-column: span 1;
     }
+
+    .outfits-grid {
+        column-count: 2;
+    }
 }
 
 @media (max-width: 768px) {
@@ -1374,7 +1665,22 @@ body::before {
     }
 
     .sidebar {
-        position: static;
+        position: fixed;
+        top: 84px;
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        overflow: auto;
+        z-index: 10;
+    }
+
+    body:not(.sidebar-open) .sidebar {
+        display: none;
+    }
+
+    body.sidebar-open .drawer-backdrop {
+        opacity: 1;
+        pointer-events: auto;
     }
 
     .toast-container {
@@ -1382,30 +1688,12 @@ body::before {
         left: var(--spacing-md);
     }
 
-    .center-panel {
-        grid-column: span 1;
-    }
-
-    .logo {
-        font-size: var(--font-size-2xl);
-        flex-direction: column;
-        gap: var(--spacing-sm);
-    }
-
-    .logo-icon {
-        font-size: 2.5rem;
-    }
-
-    .weather-details {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
     .mannequin {
         transform: scale(0.8);
     }
 
     .outfits-grid {
-        grid-template-columns: 1fr;
+        column-count: 1;
     }
 
     .pieces-grid {

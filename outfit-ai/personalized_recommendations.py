@@ -66,17 +66,84 @@ def _outerwear_need(
     return "none"
 
 
+def _is_formal_event(event_type: Optional[str]) -> bool:
+    return event_type in {"formal", "meeting", "work", "special"}
+
+
+def _is_cold(*, sicaklik: int, cold_sensitivity: Optional[str]) -> bool:
+    temp_effective = sicaklik
+    if cold_sensitivity == "cold":
+        temp_effective -= 3
+    elif cold_sensitivity == "warm":
+        temp_effective += 2
+    return temp_effective <= 12
+
+
+def _pick_first(items: List[Any], predicate) -> Optional[Any]:
+    for it in items:
+        try:
+            if predicate(it):
+                return it
+        except Exception:
+            continue
+    return None
+
+
+def _choose_board_key(
+    *,
+    event_type: Optional[str],
+    style: Optional[str],
+    yagmur: str,
+    sicaklik: int,
+    color_palette: Optional[str],
+) -> str:
+    if yagmur == "var":
+        return "rainy"
+    if sicaklik <= 8:
+        return "winter"
+    if sicaklik >= 28:
+        return "summer"
+
+    if event_type in {"work", "meeting"}:
+        return "business"
+    if event_type == "date":
+        return "date"
+    if event_type == "class":
+        return "class"
+    if event_type == "outdoors":
+        return "outdoors"
+    if event_type == "sport":
+        return "sporty"
+
+    if style == "street":
+        return "street"
+    if style == "classic":
+        return "classic"
+    if style == "minimalist":
+        return "minimalist"
+    if style == "formal":
+        return "formal"
+
+    return "default"
+
+
+def _board_image_url(key: str) -> str:
+    return f"/static/images/boards/{key}.svg"
+
+
 def _bottom_preference(event_type: Optional[str], style: Optional[str], sicaklik: int) -> str:
+    if _is_formal_event(event_type) or style in ["formal", "classic"]:
+        return "chinos"
     if sicaklik >= 28 and (style in ["sporty", "casual", "street"]):
         return "shorts"
-    if event_type in ["work", "meeting", "special"] or style in ["formal", "classic"]:
-        return "chinos"
     return "jeans"
 
 
 def _shoes_preference(event_type: Optional[str], style: Optional[str], sicaklik: int) -> str:
     if event_type == "sport" or style == "sporty":
         return "sneaker"
+    if _is_formal_event(event_type) or style in ["formal", "classic", "minimalist"]:
+        return "loafer"
     if sicaklik < 10:
         return "boot"
     if event_type in ["work", "meeting", "special"] or style in ["formal", "classic", "minimalist"]:
@@ -116,6 +183,9 @@ def generate_outfit_recommendations(
 
     style = profile.style
     palette = profile.color_palette
+
+    formal = _is_formal_event(profile.event_type)
+    cold = _is_cold(sicaklik=sicaklik, cold_sensitivity=profile.cold_sensitivity)
 
     outer_strategy = _outerwear_need(
         sicaklik=sicaklik,
@@ -170,15 +240,40 @@ def generate_outfit_recommendations(
     else:
         outer_candidates = []
 
+    if cold and not outer_candidates:
+        outer_candidates = [o for o in outerwear_all if ("coat" in o.key or "jacket" in o.key)] or outerwear_all
+
     bmi = compute_bmi(profile.height_cm, profile.weight_kg)
     fit_note = _fit_note_from_bmi(bmi)
 
     outfits: List[Dict[str, Any]] = []
 
+    board_key = _choose_board_key(
+        event_type=profile.event_type,
+        style=style,
+        yagmur=yagmur,
+        sicaklik=sicaklik,
+        color_palette=palette,
+    )
+
     for i in range(max(3, min(8, count))):
-        top = _select_index(tops, i)
-        bottom = _select_index(bottom_candidates, i)
-        shoes = _select_index(shoes_candidates, i)
+        # Prefer shirt/chinos/loafer for formal contexts.
+        if formal:
+            top = _pick_first(tops, lambda t: "shirt" in t.key) or _select_index(tops, i)
+            bottom = _pick_first(bottom_candidates, lambda b: "short" not in b.key and "chinos" in b.key) or _select_index(bottom_candidates, i)
+            shoes = _pick_first(shoes_candidates, lambda s: "boot" not in s.key and "loafer" in s.key) or _select_index(shoes_candidates, i)
+        else:
+            top = _select_index(tops, i)
+            bottom = _select_index(bottom_candidates, i)
+            shoes = _select_index(shoes_candidates, i)
+
+        # Auto-correct obvious nonsense combos.
+        if formal and "short" in bottom.key:
+            bottom = _pick_first(bottoms_all, lambda b: "chinos" in b.key) or bottom
+        if formal and "boot" in shoes.key:
+            shoes = _pick_first(shoes_all, lambda s: "loafer" in s.key) or shoes
+        if yagmur == "var" and not formal and "loafer" in shoes.key:
+            shoes = _pick_first(shoes_all, lambda s: "boot" in s.key or "sneaker" in s.key) or shoes
 
         pieces = [
             item_to_piece_dict(top, gender=profile.gender, color_palette=palette),
@@ -186,9 +281,15 @@ def generate_outfit_recommendations(
             item_to_piece_dict(shoes, gender=profile.gender, color_palette=palette),
         ]
 
-        # Outerwear only for some outfits to create variety.
-        if outer_candidates and (i % 2 == 0):
-            outer = _select_index(outer_candidates, i)
+        # Outerwear enforcement: rain/cold always layered.
+        must_have_outer = outer_strategy in ("rain", "heavy", "medium") or cold
+        if outer_candidates and (must_have_outer or (i % 2 == 0)):
+            if outer_strategy == "rain":
+                outer = _pick_first(outer_candidates, lambda o: "rain" in o.key) or _select_index(
+                    outer_candidates, i
+                )
+            else:
+                outer = _select_index(outer_candidates, i)
             pieces.insert(2, item_to_piece_dict(outer, gender=profile.gender, color_palette=palette))
 
         # Accessory (umbrella when raining, otherwise rotate).
@@ -246,6 +347,7 @@ def generate_outfit_recommendations(
                 "title": title,
                 "reasons": reasons,
                 "pieces": pieces,
+                "board_image": _board_image_url(board_key),
                 "meta": {
                     "base_outfit": base_outfit,
                     "mevsim": mevsim,

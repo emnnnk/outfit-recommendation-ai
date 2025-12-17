@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 
-<body>
+<body class="sidebar-open">
     <!-- City Background Image -->
     <div id="city-background" class="city-bg"></div>
     <div class="city-overlay"></div>
@@ -40,8 +40,26 @@
 
     <!-- Main Container -->
     <div class="container">
+        <header class="topbar" id="topbar">
+            <button class="icon-btn" id="sidebar-toggle" aria-label="Menü">
+                <span class="hamburger" aria-hidden="true"></span>
+            </button>
+
+            <div class="topbar-brand" aria-label="Outfit AI">
+                <span class="topbar-logo">🧥</span>
+                <span class="topbar-title">Outfit AI</span>
+            </div>
+
+            <button id="topbar-generate" class="btn btn-secondary topbar-cta">
+                <span class="btn-icon">✨</span>
+                Generate
+            </button>
+        </header>
+
+        <div class="drawer-backdrop" id="drawer-backdrop" aria-hidden="true"></div>
+
         <!-- Header -->
-        <header class="header">
+        <header class="header legacy-header">
             <h1 class="logo">
                 <span class="logo-icon">🧥</span>
                 <span class="logo-text">Akıllı Kıyafet Öneri</span>

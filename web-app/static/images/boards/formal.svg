@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a0a1a"/>
+      <stop offset="0.6" stop-color="#302b63"/>
+      <stop offset="1" stop-color="#11192f"/>
+    </linearGradient>
+    <radialGradient id="r" cx="70%" cy="25%" r="70%">
+      <stop offset="0" stop-color="rgba(240,147,251,0.55)"/>
+      <stop offset="1" stop-color="rgba(240,147,251,0)"/>
+    </radialGradient>
+    <filter id="b" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="20"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="800" fill="url(#g)"/>
+  <circle cx="860" cy="210" r="300" fill="url(#r)" filter="url(#b)"/>
+  <g opacity="0.28">
+    <path d="M120 590 C260 480, 420 730, 600 600 C760 490, 900 690, 1040 580 C1120 520, 1160 540, 1200 520 L1200 800 L0 800 Z" fill="rgba(255,255,255,0.08)"/>
+  </g>
+  <g font-family="Inter,Segoe UI,Arial" fill="rgba(255,255,255,0.92)">
+    <text x="70" y="120" font-size="54" font-weight="850" letter-spacing="-0.6">Formal</text>
+    <text x="70" y="165" font-size="24" font-weight="500" fill="rgba(255,255,255,0.75)">Sharp silhouettes • clean palette</text>
+  </g>
+</svg>

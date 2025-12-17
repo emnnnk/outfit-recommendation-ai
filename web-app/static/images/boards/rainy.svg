@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d1b2a"/>
+      <stop offset="0.55" stop-color="#1b263b"/>
+      <stop offset="1" stop-color="#415a77"/>
+    </linearGradient>
+    <filter id="b" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="14"/></filter>
+  </defs>
+  <rect width="1200" height="800" fill="url(#g)"/>
+  <g opacity="0.35" filter="url(#b)">
+    <circle cx="260" cy="220" r="210" fill="rgba(79,172,254,0.55)"/>
+    <circle cx="920" cy="180" r="260" fill="rgba(240,147,251,0.25)"/>
+  </g>
+  <g opacity="0.35" stroke="rgba(255,255,255,0.55)" stroke-width="2">
+    <path d="M160 270 l-18 50"/>
+    <path d="M220 280 l-18 54"/>
+    <path d="M280 260 l-18 58"/>
+    <path d="M340 290 l-18 52"/>
+    <path d="M900 270 l-18 50"/>
+    <path d="M960 280 l-18 54"/>
+    <path d="M1020 260 l-18 58"/>
+    <path d="M1080 290 l-18 52"/>
+  </g>
+  <path d="M0 650 C220 520, 380 790, 610 660 C820 540, 1000 720, 1200 610 L1200 800 L0 800 Z" fill="rgba(10,10,26,0.55)"/>
+  <g font-family="Inter,Segoe UI,Arial" fill="rgba(255,255,255,0.92)">
+    <text x="70" y="120" font-size="54" font-weight="850" letter-spacing="-0.6">Rainy</text>
+    <text x="70" y="165" font-size="24" font-weight="500" fill="rgba(255,255,255,0.75)">Waterproof layers • traction shoes</text>
+  </g>
+</svg>
