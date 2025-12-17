@@ -207,6 +207,90 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="glass-card settings-card" id="profile-card">
+                    <div class="card-header">
+                        <span class="card-icon">🧑‍🎨</span>
+                        <h2>Profil</h2>
+                    </div>
+
+                    <div class="settings-grid">
+                        <div class="setting-item">
+                            <label for="gender-select">Cinsiyet</label>
+                            <select id="gender-select" class="select-input">
+                                <option value="unisex" selected>Unisex</option>
+                                <option value="male">Erkek</option>
+                                <option value="female">Kadın</option>
+                                <option value="prefer_not">Belirtmek istemiyorum</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="age-range-select">Yaş Aralığı</label>
+                            <select id="age-range-select" class="select-input">
+                                <option value="<18">&lt;18</option>
+                                <option value="18-24" selected>18-24</option>
+                                <option value="25-34">25-34</option>
+                                <option value="35-44">35-44</option>
+                                <option value="45+">45+</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="height-cm">Boy (cm) (opsiyonel)</label>
+                            <input id="height-cm" type="number" inputmode="numeric" min="80" max="230" placeholder="Örn: 175" class="text-input" />
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="weight-kg">Kilo (kg) (opsiyonel)</label>
+                            <input id="weight-kg" type="number" inputmode="numeric" min="25" max="250" placeholder="Örn: 72" class="text-input" />
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="style-select">Stil</label>
+                            <select id="style-select" class="select-input">
+                                <option value="casual" selected>Casual</option>
+                                <option value="sporty">Sporty</option>
+                                <option value="classic">Classic</option>
+                                <option value="street">Street</option>
+                                <option value="minimalist">Minimalist</option>
+                                <option value="formal">Formal</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="palette-select">Renk Paleti</label>
+                            <select id="palette-select" class="select-input">
+                                <option value="neutral" selected>Neutral</option>
+                                <option value="dark">Dark</option>
+                                <option value="pastel">Pastel</option>
+                                <option value="vibrant">Vibrant</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="cold-sensitivity-select">Üşüme / Terleme</label>
+                            <select id="cold-sensitivity-select" class="select-input">
+                                <option value="cold">Üşürüm (soğuğa hassas)</option>
+                                <option value="normal" selected>Normal</option>
+                                <option value="warm">Çabuk terlerim</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="event-type-select">Etkinlik</label>
+                            <select id="event-type-select" class="select-input">
+                                <option value="work" selected>Work</option>
+                                <option value="meeting">Meeting</option>
+                                <option value="class">Class</option>
+                                <option value="outdoors">Outdoors</option>
+                                <option value="sport">Sport</option>
+                                <option value="date">Date</option>
+                                <option value="special">Special</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Center Panel: Outfit Display -->
@@ -309,6 +393,27 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="glass-card outfits-card" id="outfits-card">
+            <div class="card-header">
+                <span class="card-icon">🧩</span>
+                <h2>Outfit Önerileri</h2>
+            </div>
+
+            <div id="outfits-loading" class="outfits-loading hidden">
+                <div class="spinner"></div>
+                <p>Öneriler hazırlanıyor...</p>
+            </div>
+
+            <div id="outfits-error" class="outfits-error hidden"></div>
+
+            <div id="outfits-placeholder" class="outfits-placeholder">
+                <span class="placeholder-icon">🪄</span>
+                <p>Profilini doldur ve "Kıyafet Öner" butonuna tıkla. 5-8 kombin burada listelenecek.</p>
+            </div>
+
+            <div id="outfits-grid" class="outfits-grid hidden"></div>
         </div>
 
         <!-- Footer -->

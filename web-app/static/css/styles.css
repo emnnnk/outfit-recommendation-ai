@@ -72,6 +72,10 @@
     box-sizing: border-box;
 }
 
+.hidden {
+    display: none !important;
+}
+
 html {
     font-size: 16px;
     scroll-behavior: smooth;
@@ -344,6 +348,29 @@ body::before {
 .select-input option {
     background: var(--bg-secondary);
     color: var(--text-primary);
+}
+
+.text-input {
+    width: 100%;
+    padding: var(--spacing-md);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    font-size: var(--font-size-md);
+    outline: none;
+    transition: all var(--transition-fast);
+}
+
+.text-input::placeholder {
+    color: var(--text-muted);
+}
+
+.text-input:hover,
+.text-input:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--primary);
 }
 
 /* Live Date/Time */
@@ -1115,6 +1142,10 @@ body::before {
     .mannequin-card {
         min-height: 400px;
     }
+
+    .outfits-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
@@ -1146,6 +1177,14 @@ body::before {
 
     .mannequin {
         transform: scale(0.8);
+    }
+
+    .outfits-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pieces-grid {
+        grid-template-columns: 1fr;
     }
 }
 

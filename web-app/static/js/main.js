@@ -24,6 +24,20 @@ class OutfitApp {
         this.ruleResult = document.getElementById('rule-result');
         this.matchStatus = document.getElementById('match-status');
 
+        this.genderSelect = document.getElementById('gender-select');
+        this.ageRangeSelect = document.getElementById('age-range-select');
+        this.heightCmInput = document.getElementById('height-cm');
+        this.weightKgInput = document.getElementById('weight-kg');
+        this.styleSelect = document.getElementById('style-select');
+        this.paletteSelect = document.getElementById('palette-select');
+        this.coldSensitivitySelect = document.getElementById('cold-sensitivity-select');
+        this.eventTypeSelect = document.getElementById('event-type-select');
+
+        this.outfitsLoading = document.getElementById('outfits-loading');
+        this.outfitsError = document.getElementById('outfits-error');
+        this.outfitsPlaceholder = document.getElementById('outfits-placeholder');
+        this.outfitsGrid = document.getElementById('outfits-grid');
+
         // State
         this.weatherData = null;
         this.isLoading = false;
@@ -32,6 +46,7 @@ class OutfitApp {
         // Initialize
         this.bindEvents();
         this.hideLoading();
+        this.hideOutfitsLoading();
     }
 
     bindEvents() {
@@ -239,8 +254,19 @@ class OutfitApp {
             yagmur: this.rainSelect.value,
             ruzgar: this.windSelect.value,
             ortam: this.occasionSelect.value,
-            mevsim: this.seasonSelect.value
+            mevsim: this.seasonSelect.value,
+
+            gender: this.genderSelect ? this.genderSelect.value : null,
+            age_range: this.ageRangeSelect ? this.ageRangeSelect.value : null,
+            height_cm: this.heightCmInput ? this.heightCmInput.value : null,
+            weight_kg: this.weightKgInput ? this.weightKgInput.value : null,
+            style: this.styleSelect ? this.styleSelect.value : null,
+            color_palette: this.paletteSelect ? this.paletteSelect.value : null,
+            cold_sensitivity: this.coldSensitivitySelect ? this.coldSensitivitySelect.value : null,
+            event_type: this.eventTypeSelect ? this.eventTypeSelect.value : null,
         };
+
+        this.showOutfitsLoading();
 
         // Add loading state to button
         this.predictBtn.disabled = true;
@@ -262,13 +288,17 @@ class OutfitApp {
 
             if (result.success) {
                 this.displayResults(result);
+                this.displayOutfits(result.outfits);
             } else {
                 this.showError('Tahmin yapılamadı: ' + result.error);
+                this.showOutfitsError('Tahmin yapılamadı: ' + result.error);
             }
         } catch (error) {
             console.error('Prediction error:', error);
             this.showError('Bağlantı hatası. Lütfen tekrar deneyin.');
+            this.showOutfitsError('Bağlantı hatası. Lütfen tekrar deneyin.');
         } finally {
+            this.hideOutfitsLoading();
             // Reset button
             this.predictBtn.disabled = false;
             this.predictBtn.innerHTML = `
@@ -354,6 +384,67 @@ class OutfitApp {
         });
     }
 
+    // Render multi-outfit recommendations
+    displayOutfits(outfits) {
+        if (!this.outfitsGrid || !this.outfitsPlaceholder || !this.outfitsError) return;
+
+        this.outfitsError.classList.add('hidden');
+
+        if (!Array.isArray(outfits) || outfits.length === 0) {
+            this.outfitsGrid.classList.add('hidden');
+            this.outfitsGrid.innerHTML = '';
+            this.outfitsPlaceholder.classList.remove('hidden');
+            return;
+        }
+
+        this.outfitsPlaceholder.classList.add('hidden');
+        this.outfitsGrid.classList.remove('hidden');
+
+        const cardsHtml = outfits
+            .map((o) => {
+                const title = this.escapeHtml(o.title || 'Outfit');
+                const reasons = Array.isArray(o.reasons) ? o.reasons : [];
+                const pieces = Array.isArray(o.pieces) ? o.pieces : [];
+
+                const reasonsHtml = reasons
+                    .slice(0, 5)
+                    .map((r) => `<li>${this.escapeHtml(r)}</li>`)
+                    .join('');
+
+                const piecesHtml = pieces
+                    .map((p) => {
+                        const label = this.escapeHtml(p.label || p.category || 'Parça');
+                        const img = this.escapeHtml(p.image || '');
+                        const link = this.escapeHtml(p.link || '#');
+                        return `
+                            <div class="piece-item">
+                                <div class="piece-image">
+                                    <img src="${img}" alt="${label}" loading="lazy" />
+                                </div>
+                                <div class="piece-meta">
+                                    <div class="piece-label">${label}</div>
+                                    <a class="piece-link" href="${link}" target="_blank" rel="noopener noreferrer">Shop</a>
+                                </div>
+                            </div>
+                        `;
+                    })
+                    .join('');
+
+                return `
+                    <div class="outfit-card">
+                        <div class="outfit-card-header">
+                            <div class="outfit-card-title">${title}</div>
+                        </div>
+                        <ul class="outfit-reasons">${reasonsHtml}</ul>
+                        <div class="pieces-grid">${piecesHtml}</div>
+                    </div>
+                `;
+            })
+            .join('');
+
+        this.outfitsGrid.innerHTML = cardsHtml;
+    }
+
     // Format outfit name for display
     formatOutfitName(name) {
         return name
@@ -362,6 +453,15 @@ class OutfitApp {
             .split(' ')
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
+    }
+
+    escapeHtml(text) {
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
 
     // Show loading state
@@ -386,6 +486,26 @@ class OutfitApp {
         `;
         this.weatherPlaceholder.classList.remove('hidden');
         this.weatherDisplay.classList.add('hidden');
+    }
+
+    showOutfitsLoading() {
+        if (this.outfitsLoading) this.outfitsLoading.classList.remove('hidden');
+        if (this.outfitsError) this.outfitsError.classList.add('hidden');
+        if (this.outfitsPlaceholder) this.outfitsPlaceholder.classList.add('hidden');
+        if (this.outfitsGrid) this.outfitsGrid.classList.add('hidden');
+    }
+
+    hideOutfitsLoading() {
+        if (this.outfitsLoading) this.outfitsLoading.classList.add('hidden');
+    }
+
+    showOutfitsError(message) {
+        if (!this.outfitsError) return;
+
+        this.outfitsError.textContent = message;
+        this.outfitsError.classList.remove('hidden');
+        if (this.outfitsGrid) this.outfitsGrid.classList.add('hidden');
+        if (this.outfitsPlaceholder) this.outfitsPlaceholder.classList.remove('hidden');
     }
 
     // Create ripple effect on buttons
