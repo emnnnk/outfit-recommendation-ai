@@ -49,10 +49,22 @@ class OutfitApp {
         this.drawerBackdrop = document.getElementById('drawer-backdrop');
         this.topbarGenerate = document.getElementById('topbar-generate');
 
+        this.avatarPieces = document.getElementById('avatar-pieces');
+        this.avatarShadow = document.getElementById('avatar-shadow');
+        this.avatarBody = document.getElementById('avatar-body');
+        this.avatarTop = document.getElementById('avatar-top');
+        this.avatarBottom = document.getElementById('avatar-bottom');
+        this.avatarShoes = document.getElementById('avatar-shoes');
+        this.avatarOuterwear = document.getElementById('avatar-outerwear');
+        this.avatarAccessory = document.getElementById('avatar-accessory');
+        this.avatarHighlight = document.getElementById('avatar-highlight');
+
         // State
         this.weatherData = null;
         this.isLoading = false;
         this.seasonManuallyChanged = false;
+        this.currentOutfits = [];
+        this.selectedOutfitIndex = 0;
 
         // Initialize
         this.bindEvents();
@@ -117,6 +129,16 @@ class OutfitApp {
         document.querySelectorAll('.btn').forEach(btn => {
             btn.addEventListener('click', (e) => this.createRipple(e));
         });
+
+        if (this.outfitsGrid) {
+            this.outfitsGrid.addEventListener('click', (e) => {
+                const card = e.target && e.target.closest ? e.target.closest('.pin-card[data-outfit-index]') : null;
+                if (!card) return;
+                const idx = parseInt(card.getAttribute('data-outfit-index') || '0', 10);
+                if (!Number.isFinite(idx)) return;
+                this.selectOutfitIndex(idx);
+            });
+        }
 
         // Start live clock
         this.updateDateTime();
@@ -333,10 +355,12 @@ class OutfitApp {
                 this.displayResults(result);
                 this.displayOutfits(result.outfits);
                 this.displaySelectedPrediction(result.selected_prediction, result);
+                this.setOutfits(result.outfits);
                 this.showToast('Öneriler hazır', 'success');
             } else {
                 this.showError('Tahmin yapılamadı: ' + result.error);
                 this.showOutfitsError('Tahmin yapılamadı: ' + result.error);
+                this.setOutfits([]);
                 this.showToast('Tahmin yapılamadı', 'error');
             }
         } catch (error) {
@@ -471,11 +495,13 @@ class OutfitApp {
 
                 const piecesHtml = pieces
                     .map((p) => {
-                        const label = this.escapeHtml(p.label || p.category || 'Parça');
-                        const category = this.escapeHtml(p.category || '');
-                        const img = this.escapeHtml(p.image || '');
-                        const link = this.escapeHtml(p.link || '#');
-                        const onError = this.imgOnErrorTo(this.defaultPieceImage());
+                        const labelRaw = p.label || p.category || 'Parça';
+                        const label = this.escapeHtml(labelRaw);
+                        const categoryRaw = p.category || '';
+                        const category = this.escapeHtml(categoryRaw);
+                        const img = this.escapeHtml(this.resolvePieceImage(p));
+                        const link = this.escapeHtml(p.shop_link || p.link || '#');
+                        const onError = this.imgOnErrorTo(this.categoryFallbackImage(categoryRaw));
 
                         return `
                             <div class="piece-mini">
@@ -484,7 +510,7 @@ class OutfitApp {
                                     <div class="piece-mini-title">${label}</div>
                                     <div class="piece-mini-meta">
                                         <span class="piece-mini-cat">${category}</span>
-                                        <a class="shop-mini" href="${link}" target="_blank" rel="noopener noreferrer" aria-label="Shop">🛒</a>
+                                        <a class="shop-mini" href="${link}" target="_blank" rel="noopener noreferrer" aria-label="Boyner">B</a>
                                     </div>
                                 </div>
                             </div>
@@ -493,7 +519,7 @@ class OutfitApp {
                     .join('');
 
                 return `
-                    <article class="pin-card">
+                    <article class="pin-card" data-outfit-index="${idx}">
                         <div class="pin-hero">
                             <img src="${hero}" alt="${title}" loading="lazy" ${heroOnError} />
                         </div>
@@ -514,6 +540,102 @@ class OutfitApp {
             .join('');
 
         this.outfitsGrid.innerHTML = cardsHtml;
+
+        this.setOutfits(outfits);
+    }
+
+    avatarAsset(name) {
+        return `/static/images/avatar/${name}.svg`;
+    }
+
+    setOutfits(outfits) {
+        this.currentOutfits = Array.isArray(outfits) ? outfits : [];
+        this.selectedOutfitIndex = 0;
+        this.applySelectedOutfitStyles();
+        this.updateAvatarFromOutfit(this.currentOutfits[0]);
+    }
+
+    selectOutfitIndex(idx) {
+        if (!Array.isArray(this.currentOutfits) || this.currentOutfits.length === 0) return;
+        const safe = Math.max(0, Math.min(this.currentOutfits.length - 1, idx));
+        this.selectedOutfitIndex = safe;
+        this.applySelectedOutfitStyles();
+        this.updateAvatarFromOutfit(this.currentOutfits[safe]);
+    }
+
+    applySelectedOutfitStyles() {
+        if (!this.outfitsGrid) return;
+        const cards = this.outfitsGrid.querySelectorAll('.pin-card[data-outfit-index]');
+        cards.forEach((card) => {
+            const idx = parseInt(card.getAttribute('data-outfit-index') || '0', 10);
+            const isSelected = idx === this.selectedOutfitIndex;
+            card.classList.toggle('is-selected', isSelected);
+        });
+    }
+
+    updateAvatarFromOutfit(outfit) {
+        if (!outfit) {
+            if (this.avatarPieces) {
+                this.avatarPieces.innerHTML = '<div class="avatar-pieces-placeholder">Bir kombin seçildiğinde parçalar burada görünecek.</div>';
+            }
+            return;
+        }
+
+        const layers = outfit.avatar_layers || {};
+        const safeLayer = (key, fallback) => {
+            const v = layers && typeof layers[key] === 'string' ? layers[key].trim() : '';
+            return v || fallback;
+        };
+
+        if (this.avatarBody) this.avatarBody.src = safeLayer('body', this.avatarAsset('body'));
+        if (this.avatarTop) this.avatarTop.src = safeLayer('top', this.avatarAsset('top'));
+        if (this.avatarBottom) this.avatarBottom.src = safeLayer('bottom', this.avatarAsset('bottom'));
+        if (this.avatarShoes) this.avatarShoes.src = safeLayer('shoes', this.avatarAsset('shoes'));
+
+        const outer = layers && typeof layers.outerwear === 'string' ? layers.outerwear.trim() : '';
+        if (this.avatarOuterwear) {
+            this.avatarOuterwear.src = outer || this.avatarAsset('outerwear');
+            this.avatarOuterwear.classList.toggle('hidden', !outer);
+        }
+
+        const acc = layers && typeof layers.accessory === 'string' ? layers.accessory.trim() : '';
+        if (this.avatarAccessory) {
+            this.avatarAccessory.src = acc || this.avatarAsset('accessory');
+            this.avatarAccessory.classList.toggle('hidden', !acc);
+        }
+
+        this.renderAvatarPieces(outfit.pieces);
+    }
+
+    renderAvatarPieces(pieces) {
+        if (!this.avatarPieces) return;
+
+        const list = Array.isArray(pieces) ? pieces : [];
+        if (list.length === 0) {
+            this.avatarPieces.innerHTML = '<div class="avatar-pieces-placeholder">Bir kombin seçildiğinde parçalar burada görünecek.</div>';
+            return;
+        }
+
+        const rows = list.map((p) => {
+            const label = this.escapeHtml(p.label || p.category || 'Parça');
+            const category = this.escapeHtml(p.category || '');
+            const img = this.escapeHtml(this.resolvePieceImage(p));
+            const link = this.escapeHtml(p.shop_link || p.link || '#');
+            const onError = this.imgOnErrorTo(this.categoryFallbackImage(p.category || 'top'));
+
+            return `
+                <div class="avatar-piece-row">
+                    <img src="${img}" alt="${label}" loading="lazy" ${onError} />
+                    <div>
+                        <div class="avatar-piece-title">${label}</div>
+                        <div class="avatar-piece-sub">${category}</div>
+                    </div>
+                    <a class="avatar-shop" href="${link}" target="_blank" rel="noopener noreferrer">Shop</a>
+                </div>
+            `;
+        });
+
+        this.avatarPieces.innerHTML = rows.join('');
     }
 
     applyInitialSidebarState() {
@@ -540,6 +662,38 @@ class OutfitApp {
 
     defaultPieceImage() {
         return '/static/images/boards/piece.svg';
+    }
+
+    categoryFallbackImage(category) {
+        const safe = ['top', 'bottom', 'shoes', 'outerwear', 'accessory'].includes(category)
+            ? category
+            : 'top';
+        return `/static/images/pieces_fallback/${safe}.svg`;
+    }
+
+    resolvePieceImage(piece) {
+        const category = piece?.category || 'top';
+        const label = piece?.label || piece?.category || 'piece';
+        const base = piece?.image || '';
+
+        if (typeof base === 'string' && base.trim().length > 0) {
+            return base;
+        }
+
+        // deterministic generated placeholder, mirrors backend filename scheme
+        const palette = (this.paletteSelect?.value || 'default');
+        const slugify = (t) => {
+            const map = { 'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u' };
+            return String(t)
+                .toLowerCase()
+                .replace(/[çğıöşü]/g, (m) => map[m] || m)
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '') || 'item';
+        };
+
+        const gen = `/static/images/generated/${category}__${slugify(label)}__${slugify(palette)}.svg`;
+        return gen;
     }
 
     imgOnErrorTo(url) {

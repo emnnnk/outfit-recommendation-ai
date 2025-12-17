@@ -97,7 +97,8 @@ Kişiselleştirme gönderildiğinde ayrıca `outfits` (liste) döner.
           "key": "top_tshirt",
           "label": "Tişört",
           "image": "/static/images/outfits/tisort.png",
-          "link": "https://www.trendyol.com/sr?q=erkek%20bej%20ti%C5%9F%C3%B6rt"
+          "shop_link": "https://www.boyner.com.tr/search?q=erkek%20daily%20bej%20ti%C5%9F%C3%B6rt",
+          "link": "https://www.boyner.com.tr/search?q=erkek%20daily%20bej%20ti%C5%9F%C3%B6rt"
         }
       ],
       "meta": { "base_outfit": "tişört", "mevsim": "ilkbahar", "ortam": "günlük", "bmi": 24.7 }

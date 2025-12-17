@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+  <defs>
+    <linearGradient id="skin" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffd6b0"/>
+      <stop offset="1" stop-color="#f4a896"/>
+    </linearGradient>
+    <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="rgba(0,0,0,0.05)"/>
+      <stop offset="1" stop-color="rgba(0,0,0,0.22)"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="900" height="1200" rx="120" fill="rgba(255,255,255,0.02)"/>
+
+  <!-- Head -->
+  <circle cx="450" cy="190" r="95" fill="url(#skin)"/>
+
+  <!-- Torso -->
+  <path d="M310 300 C330 270, 570 270, 590 300 C650 390, 690 560, 675 705 C660 840, 590 960, 450 960 C310 960, 240 840, 225 705 C210 560, 250 390, 310 300 Z" fill="url(#skin)"/>
+
+  <!-- Arms -->
+  <path d="M250 360 C210 420, 190 520, 205 635 C220 740, 275 800, 315 780 C340 768, 342 728, 320 690 C295 648, 287 590, 300 515 C315 428, 320 378, 250 360 Z" fill="url(#skin)" opacity="0.95"/>
+  <path d="M650 360 C690 420, 710 520, 695 635 C680 740, 625 800, 585 780 C560 768, 558 728, 580 690 C605 648, 613 590, 600 515 C585 428, 580 378, 650 360 Z" fill="url(#skin)" opacity="0.95"/>
+
+  <!-- Legs -->
+  <path d="M360 920 C345 1010, 345 1120, 362 1160 C378 1196, 422 1202, 438 1160 C455 1116, 456 1030, 450 920 Z" fill="url(#skin)"/>
+  <path d="M540 920 C555 1010, 555 1120, 538 1160 C522 1196, 478 1202, 462 1160 C445 1116, 444 1030, 450 920 Z" fill="url(#skin)"/>
+
+  <!-- Subtle shading for depth -->
+  <path d="M310 300 C330 270, 570 270, 590 300 C650 390, 690 560, 675 705 C660 840, 590 960, 450 960 C310 960, 240 840, 225 705 C210 560, 250 390, 310 300 Z" fill="url(#shade)" opacity="0.35"/>
+</svg>

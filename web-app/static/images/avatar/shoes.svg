@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#11192f"/>
+      <stop offset="1" stop-color="#4facfe"/>
+    </linearGradient>
+  </defs>
+  <!-- shoes overlay -->
+  <path d="M250 1130 C310 1100, 370 1105, 410 1128 C450 1152, 452 1180, 430 1195 C390 1222, 300 1218, 240 1188 C210 1172, 210 1148, 250 1130 Z" fill="url(#g)" opacity="0.95"/>
+  <path d="M490 1128 C530 1105, 590 1100, 650 1130 C690 1148, 690 1172, 660 1188 C600 1218, 510 1222, 470 1195 C448 1180, 450 1152, 490 1128 Z" fill="url(#g)" opacity="0.95"/>
+</svg>

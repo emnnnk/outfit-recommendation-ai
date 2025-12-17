@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#667eea"/>
+      <stop offset="1" stop-color="#4facfe"/>
+    </linearGradient>
+  </defs>
+  <!-- stylized top garment overlay -->
+  <path d="M270 330 C320 280, 580 280, 630 330 C700 400, 720 520, 700 640 C690 700, 620 720, 450 720 C280 720, 210 700, 200 640 C180 520, 200 400, 270 330 Z" fill="url(#g)" opacity="0.92"/>
+  <path d="M305 360 C335 325, 565 325, 595 360" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="14" stroke-linecap="round"/>
+</svg>

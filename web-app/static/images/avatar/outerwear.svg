@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#11998e"/>
+      <stop offset="1" stop-color="#38ef7d"/>
+    </linearGradient>
+  </defs>
+  <!-- outerwear overlay (coat/jacket) -->
+  <path d="M255 315 C330 250, 570 250, 645 315 C710 370, 745 520, 730 670 C720 770, 665 830, 585 860 C535 880, 485 890, 450 890 C415 890, 365 880, 315 860 C235 830, 180 770, 170 670 C155 520, 190 370, 255 315 Z" fill="url(#g)" opacity="0.78"/>
+  <path d="M450 300 L450 880" stroke="rgba(0,0,0,0.18)" stroke-width="10"/>
+  <circle cx="450" cy="460" r="10" fill="rgba(255,255,255,0.40)"/>
+  <circle cx="450" cy="540" r="10" fill="rgba(255,255,255,0.40)"/>
+  <circle cx="450" cy="620" r="10" fill="rgba(255,255,255,0.40)"/>
+</svg>

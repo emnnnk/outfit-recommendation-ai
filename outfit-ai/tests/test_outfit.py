@@ -197,10 +197,12 @@ class TestPersonalizedRecommendations:
             assert "key" in piece
             assert "label" in piece
             assert "image" in piece
+            assert "shop_link" in piece
             assert "link" in piece
 
-            assert piece["image"].startswith("/static/images/outfits/")
-            assert piece["link"].startswith("https://www.trendyol.com/sr?q=")
+            assert piece["image"].startswith("/static/images/")
+            assert piece["shop_link"].startswith("https://www.boyner.com.tr/search?q=")
+            assert piece["link"].startswith("https://www.boyner.com.tr/search?q=")
 
     def test_generate_outfits_rain_includes_umbrella_piece(self):
         profile = UserProfile(style="street", color_palette="dark")

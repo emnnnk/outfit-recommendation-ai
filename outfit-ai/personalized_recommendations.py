@@ -131,6 +131,17 @@ def _board_image_url(key: str) -> str:
     return f"/static/images/boards/{key}.svg"
 
 
+def _avatar_asset(name: str) -> str:
+    return f"/static/images/avatar/{name}.svg"
+
+
+def _pick_piece_image(pieces: List[Dict[str, Any]], category: str) -> Optional[str]:
+    for p in pieces:
+        if p.get("category") == category and p.get("image"):
+            return str(p.get("image"))
+    return None
+
+
 def _bottom_preference(event_type: Optional[str], style: Optional[str], sicaklik: int) -> str:
     if _is_formal_event(event_type) or style in ["formal", "classic"]:
         return "chinos"
@@ -276,9 +287,9 @@ def generate_outfit_recommendations(
             shoes = _pick_first(shoes_all, lambda s: "boot" in s.key or "sneaker" in s.key) or shoes
 
         pieces = [
-            item_to_piece_dict(top, gender=profile.gender, color_palette=palette),
-            item_to_piece_dict(bottom, gender=profile.gender, color_palette=palette),
-            item_to_piece_dict(shoes, gender=profile.gender, color_palette=palette),
+            item_to_piece_dict(top, gender=profile.gender, color_palette=palette, event_type=profile.event_type),
+            item_to_piece_dict(bottom, gender=profile.gender, color_palette=palette, event_type=profile.event_type),
+            item_to_piece_dict(shoes, gender=profile.gender, color_palette=palette, event_type=profile.event_type),
         ]
 
         # Outerwear enforcement: rain/cold always layered.
@@ -290,7 +301,7 @@ def generate_outfit_recommendations(
                 )
             else:
                 outer = _select_index(outer_candidates, i)
-            pieces.insert(2, item_to_piece_dict(outer, gender=profile.gender, color_palette=palette))
+            pieces.insert(2, item_to_piece_dict(outer, gender=profile.gender, color_palette=palette, event_type=profile.event_type))
 
         # Accessory (umbrella when raining, otherwise rotate).
         accessory = None
@@ -302,7 +313,19 @@ def generate_outfit_recommendations(
             accessory = _select_index(accessories_all, i)
 
         if accessory:
-            pieces.append(item_to_piece_dict(accessory, gender=profile.gender, color_palette=palette))
+            pieces.append(item_to_piece_dict(accessory, gender=profile.gender, color_palette=palette, event_type=profile.event_type))
+
+        top_img = _pick_piece_image(pieces, "top") or _avatar_asset("top")
+        bottom_img = _pick_piece_image(pieces, "bottom") or _avatar_asset("bottom")
+        shoes_img = _pick_piece_image(pieces, "shoes") or _avatar_asset("shoes")
+
+        outerwear_img = _pick_piece_image(pieces, "outerwear")
+        if not outerwear_img and cold:
+            outerwear_img = _avatar_asset("outerwear")
+
+        accessory_img = _pick_piece_image(pieces, "accessory")
+        if not accessory_img and yagmur == "var":
+            accessory_img = _avatar_asset("accessory")
 
         reasons: List[str] = []
         # Weather reasons
@@ -348,6 +371,14 @@ def generate_outfit_recommendations(
                 "reasons": reasons,
                 "pieces": pieces,
                 "board_image": _board_image_url(board_key),
+                "avatar_layers": {
+                    "body": _avatar_asset("body"),
+                    "top": top_img,
+                    "bottom": bottom_img,
+                    "shoes": shoes_img,
+                    "outerwear": outerwear_img or "",
+                    "accessory": accessory_img or "",
+                },
                 "meta": {
                     "base_outfit": base_outfit,
                     "mevsim": mevsim,
