@@ -75,226 +75,254 @@
 
         <!-- Main Content Grid -->
         <div class="main-grid">
-            <!-- Left Panel: Weather & Settings -->
-            <div class="left-panel">
-                <!-- Weather Card -->
-                <div class="glass-card weather-card" id="weather-card">
-                    <div class="card-header">
-                        <span class="card-icon">🌤️</span>
-                        <h2>Canlı Hava Durumu</h2>
-                    </div>
-
-                    <!-- Live Date/Time -->
-                    <div class="live-datetime">
-                        <div class="datetime-row">
-                            <span class="datetime-icon">📅</span>
-                            <span id="live-date" class="datetime-value">--</span>
+            <aside class="sidebar">
+                <div class="glass-card sidebar-card">
+                    <div class="sidebar-section" id="weather-card">
+                        <div class="card-header">
+                            <span class="card-icon">🌤️</span>
+                            <h2>Canlı Hava Durumu</h2>
                         </div>
-                        <div class="datetime-row">
-                            <span class="datetime-icon">🕐</span>
-                            <span id="live-time" class="datetime-value">--:--</span>
-                        </div>
-                        <div class="datetime-row">
-                            <span class="datetime-icon">🗓️</span>
-                            <span id="live-season" class="datetime-value season-badge">--</span>
-                        </div>
-                    </div>
 
-                    <div class="city-selector">
-                        <label for="city-select">📍 Şehir Seçin</label>
-                        <select id="city-select" class="select-input">
-                            {% for city in cities %}
-                            <option value="{{ city }}" {% if loop.first %}selected{% endif %}>{{ city }}</option>
-                            {% endfor %}
-                        </select>
-                        <button id="fetch-weather-btn" class="btn btn-secondary">
-                            <span class="btn-icon">🔄</span>
-                            Güncelle
-                        </button>
-                    </div>
-
-                    <div id="weather-display" class="weather-display hidden">
-                        <div class="weather-main">
-                            <span id="weather-emoji" class="weather-emoji">☀️</span>
-                            <div class="weather-temp-container">
-                                <span id="weather-temp" class="weather-temp">--</span>
-                                <span class="weather-unit">°C</span>
+                        <div class="live-datetime">
+                            <div class="datetime-row">
+                                <span class="datetime-icon">📅</span>
+                                <span id="live-date" class="datetime-value">--</span>
+                            </div>
+                            <div class="datetime-row">
+                                <span class="datetime-icon">🕐</span>
+                                <span id="live-time" class="datetime-value">--:--</span>
+                            </div>
+                            <div class="datetime-row">
+                                <span class="datetime-icon">🗓️</span>
+                                <span id="live-season" class="datetime-value season-badge">--</span>
                             </div>
                         </div>
-                        <p id="weather-desc" class="weather-desc">--</p>
-                        <div class="weather-details">
-                            <div class="weather-detail">
-                                <span class="detail-icon">🌡️</span>
-                                <span class="detail-label">Hissedilen</span>
-                                <span id="feels-like" class="detail-value">--°C</span>
+
+                        <div class="city-selector">
+                            <label for="city-select">📍 Şehir Seçin</label>
+                            <select id="city-select" class="select-input">
+                                {% for city in cities %}
+                                <option value="{{ city }}" {% if loop.first %}selected{% endif %}>{{ city }}</option>
+                                {% endfor %}
+                            </select>
+                            <button id="fetch-weather-btn" class="btn btn-secondary">
+                                <span class="btn-icon">🔄</span>
+                                Güncelle
+                            </button>
+                        </div>
+
+                        <div id="weather-display" class="weather-display hidden">
+                            <div class="weather-main">
+                                <span id="weather-emoji" class="weather-emoji">☀️</span>
+                                <div class="weather-temp-container">
+                                    <span id="weather-temp" class="weather-temp">--</span>
+                                    <span class="weather-unit">°C</span>
+                                </div>
                             </div>
-                            <div class="weather-detail">
-                                <span class="detail-icon">💧</span>
-                                <span class="detail-label">Nem</span>
-                                <span id="humidity" class="detail-value">--%</span>
+                            <p id="weather-desc" class="weather-desc">--</p>
+                            <div class="weather-details">
+                                <div class="weather-detail">
+                                    <span class="detail-icon">🌡️</span>
+                                    <span class="detail-label">Hissedilen</span>
+                                    <span id="feels-like" class="detail-value">--°C</span>
+                                </div>
+                                <div class="weather-detail">
+                                    <span class="detail-icon">💧</span>
+                                    <span class="detail-label">Nem</span>
+                                    <span id="humidity" class="detail-value">--%</span>
+                                </div>
+                                <div class="weather-detail">
+                                    <span class="detail-icon">💨</span>
+                                    <span class="detail-label">Rüzgar</span>
+                                    <span id="wind-speed" class="detail-value">-- m/s</span>
+                                </div>
+                                <div class="weather-detail">
+                                    <span class="detail-icon">🌧️</span>
+                                    <span class="detail-label">Yağış</span>
+                                    <span id="rain-status" class="detail-value">--</span>
+                                </div>
                             </div>
-                            <div class="weather-detail">
-                                <span class="detail-icon">💨</span>
-                                <span class="detail-label">Rüzgar</span>
-                                <span id="wind-speed" class="detail-value">-- m/s</span>
+                        </div>
+
+                        <div id="weather-loading" class="weather-loading">
+                            <div class="spinner"></div>
+                            <p>Hava durumu yükleniyor...</p>
+                        </div>
+
+                        <div id="weather-placeholder" class="weather-placeholder">
+                            <span class="placeholder-icon">🌍</span>
+                            <p>Hava durumunu görmek için şehir seçin ve "Güncelle" butonuna tıklayın</p>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <div class="card-header">
+                            <span class="card-icon">⚙️</span>
+                            <h2>Manuel Ayarlar</h2>
+                        </div>
+
+                        <div class="settings-grid">
+                            <div class="setting-item">
+                                <label for="temp-slider">🌡️ Sıcaklık: <span id="temp-value">20</span>°C</label>
+                                <input type="range" id="temp-slider" min="-20" max="45" value="20" class="slider">
                             </div>
-                            <div class="weather-detail">
-                                <span class="detail-icon">🌧️</span>
-                                <span class="detail-label">Yağış</span>
-                                <span id="rain-status" class="detail-value">--</span>
+
+                            <div class="setting-item">
+                                <label for="rain-select">🌧️ Yağmur</label>
+                                <select id="rain-select" class="select-input">
+                                    <option value="yok">Yok ☀️</option>
+                                    <option value="var">Var 🌧️</option>
+                                </select>
+                            </div>
+
+                            <div class="setting-item">
+                                <label for="wind-select">💨 Rüzgar</label>
+                                <select id="wind-select" class="select-input">
+                                    <option value="zayıf">Zayıf 🍃</option>
+                                    <option value="orta">Orta 💨</option>
+                                    <option value="kuvvetli">Kuvvetli 🌪️</option>
+                                </select>
+                            </div>
+
+                            <div class="setting-item">
+                                <label for="occasion-select">📍 Ortam</label>
+                                <select id="occasion-select" class="select-input">
+                                    <option value="günlük">Günlük 🏠</option>
+                                    <option value="okul">Okul 🎒</option>
+                                    <option value="özel">Özel Gün 👔</option>
+                                </select>
+                            </div>
+
+                            <div class="setting-item">
+                                <label for="season-select">🗓️ Mevsim</label>
+                                <select id="season-select" class="select-input">
+                                    <option value="ilkbahar">İlkbahar 🌸</option>
+                                    <option value="yaz">Yaz ☀️</option>
+                                    <option value="sonbahar">Sonbahar 🍂</option>
+                                    <option value="kış">Kış ❄️</option>
+                                </select>
                             </div>
                         </div>
                     </div>
 
-                    <div id="weather-loading" class="weather-loading">
-                        <div class="spinner"></div>
-                        <p>Hava durumu yükleniyor...</p>
+                    <div class="sidebar-section" id="model-card">
+                        <div class="card-header">
+                            <span class="card-icon">🧠</span>
+                            <h2>Model</h2>
+                        </div>
+
+                        <div class="settings-grid">
+                            <div class="setting-item">
+                                <label for="model-select">Model Seçimi</label>
+                                <select id="model-select" class="select-input">
+                                    <option value="best" selected>Best</option>
+                                    <option value="xgboost">XGBoost</option>
+                                    <option value="mlp">MLP</option>
+                                    <option value="rules">Rules</option>
+                                </select>
+                                <div class="field-hint">Tahmin ve güven skoru bu seçime göre hesaplanır.</div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div id="weather-placeholder" class="weather-placeholder">
-                        <span class="placeholder-icon">🌍</span>
-                        <p>Hava durumunu görmek için şehir seçin ve "Güncelle" butonuna tıklayın</p>
-                    </div>
+                    <details class="sidebar-section advanced-details" id="advanced-preferences">
+                        <summary class="advanced-summary">
+                            <span class="advanced-summary-left">
+                                <span class="card-icon">🧑‍🎨</span>
+                                <span class="advanced-title">Advanced Preferences</span>
+                            </span>
+                            <span class="advanced-chevron">⌄</span>
+                        </summary>
+
+                        <div class="advanced-body" id="profile-card">
+                            <div class="settings-grid">
+                                <div class="setting-item">
+                                    <label for="gender-select">Cinsiyet</label>
+                                    <select id="gender-select" class="select-input">
+                                        <option value="unisex" selected>Unisex</option>
+                                        <option value="male">Erkek</option>
+                                        <option value="female">Kadın</option>
+                                        <option value="prefer_not">Belirtmek istemiyorum</option>
+                                    </select>
+                                </div>
+
+                                <div class="setting-item">
+                                    <label for="age-range-select">Yaş Aralığı</label>
+                                    <select id="age-range-select" class="select-input">
+                                        <option value="<18">&lt;18</option>
+                                        <option value="18-24" selected>18-24</option>
+                                        <option value="25-34">25-34</option>
+                                        <option value="35-44">35-44</option>
+                                        <option value="45+">45+</option>
+                                    </select>
+                                </div>
+
+                                <div class="setting-item">
+                                    <label for="height-cm">Boy (cm) (opsiyonel)</label>
+                                    <input id="height-cm" type="number" inputmode="numeric" min="80" max="230" placeholder="Örn: 175" class="text-input" />
+                                </div>
+
+                                <div class="setting-item">
+                                    <label for="weight-kg">Kilo (kg) (opsiyonel)</label>
+                                    <input id="weight-kg" type="number" inputmode="numeric" min="25" max="250" placeholder="Örn: 72" class="text-input" />
+                                </div>
+
+                                <div class="setting-item">
+                                    <label for="style-select">Stil</label>
+                                    <select id="style-select" class="select-input">
+                                        <option value="casual" selected>Casual</option>
+                                        <option value="sporty">Sporty</option>
+                                        <option value="classic">Classic</option>
+                                        <option value="street">Street</option>
+                                        <option value="minimalist">Minimalist</option>
+                                        <option value="formal">Formal</option>
+                                    </select>
+                                </div>
+
+                                <div class="setting-item">
+                                    <label for="palette-select">Renk Paleti</label>
+                                    <select id="palette-select" class="select-input">
+                                        <option value="neutral" selected>Neutral</option>
+                                        <option value="dark">Dark</option>
+                                        <option value="pastel">Pastel</option>
+                                        <option value="vibrant">Vibrant</option>
+                                    </select>
+                                </div>
+
+                                <div class="setting-item">
+                                    <label for="cold-sensitivity-select">Üşüme / Terleme</label>
+                                    <select id="cold-sensitivity-select" class="select-input">
+                                        <option value="cold">Üşürüm (soğuğa hassas)</option>
+                                        <option value="normal" selected>Normal</option>
+                                        <option value="warm">Çabuk terlerim</option>
+                                    </select>
+                                </div>
+
+                                <div class="setting-item">
+                                    <label for="event-type-select">Etkinlik</label>
+                                    <select id="event-type-select" class="select-input">
+                                        <option value="work" selected>Work</option>
+                                        <option value="meeting">Meeting</option>
+                                        <option value="class">Class</option>
+                                        <option value="outdoors">Outdoors</option>
+                                        <option value="sport">Sport</option>
+                                        <option value="date">Date</option>
+                                        <option value="special">Special</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <button id="predict-btn" class="btn btn-primary btn-large">
+                        <span class="btn-icon">🎯</span>
+                        <span class="btn-text">Kıyafet Öner</span>
+                        <div class="btn-shine"></div>
+                    </button>
                 </div>
+            </aside>
 
-                <!-- Manual Settings Card -->
-                <div class="glass-card settings-card">
-                    <div class="card-header">
-                        <span class="card-icon">⚙️</span>
-                        <h2>Manuel Ayarlar</h2>
-                    </div>
-
-                    <div class="settings-grid">
-                        <div class="setting-item">
-                            <label for="temp-slider">🌡️ Sıcaklık: <span id="temp-value">20</span>°C</label>
-                            <input type="range" id="temp-slider" min="-20" max="45" value="20" class="slider">
-                        </div>
-
-                        <div class="setting-item">
-                            <label for="rain-select">🌧️ Yağmur</label>
-                            <select id="rain-select" class="select-input">
-                                <option value="yok">Yok ☀️</option>
-                                <option value="var">Var 🌧️</option>
-                            </select>
-                        </div>
-
-                        <div class="setting-item">
-                            <label for="wind-select">💨 Rüzgar</label>
-                            <select id="wind-select" class="select-input">
-                                <option value="zayıf">Zayıf 🍃</option>
-                                <option value="orta">Orta 💨</option>
-                                <option value="kuvvetli">Kuvvetli 🌪️</option>
-                            </select>
-                        </div>
-
-                        <div class="setting-item">
-                            <label for="occasion-select">📍 Ortam</label>
-                            <select id="occasion-select" class="select-input">
-                                <option value="günlük">Günlük 🏠</option>
-                                <option value="okul">Okul 🎒</option>
-                                <option value="özel">Özel Gün 👔</option>
-                            </select>
-                        </div>
-
-                        <div class="setting-item">
-                            <label for="season-select">🗓️ Mevsim</label>
-                            <select id="season-select" class="select-input">
-                                <option value="ilkbahar">İlkbahar 🌸</option>
-                                <option value="yaz">Yaz ☀️</option>
-                                <option value="sonbahar">Sonbahar 🍂</option>
-                                <option value="kış">Kış ❄️</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-card settings-card" id="profile-card">
-                    <div class="card-header">
-                        <span class="card-icon">🧑‍🎨</span>
-                        <h2>Profil</h2>
-                    </div>
-
-                    <div class="settings-grid">
-                        <div class="setting-item">
-                            <label for="gender-select">Cinsiyet</label>
-                            <select id="gender-select" class="select-input">
-                                <option value="unisex" selected>Unisex</option>
-                                <option value="male">Erkek</option>
-                                <option value="female">Kadın</option>
-                                <option value="prefer_not">Belirtmek istemiyorum</option>
-                            </select>
-                        </div>
-
-                        <div class="setting-item">
-                            <label for="age-range-select">Yaş Aralığı</label>
-                            <select id="age-range-select" class="select-input">
-                                <option value="<18">&lt;18</option>
-                                <option value="18-24" selected>18-24</option>
-                                <option value="25-34">25-34</option>
-                                <option value="35-44">35-44</option>
-                                <option value="45+">45+</option>
-                            </select>
-                        </div>
-
-                        <div class="setting-item">
-                            <label for="height-cm">Boy (cm) (opsiyonel)</label>
-                            <input id="height-cm" type="number" inputmode="numeric" min="80" max="230" placeholder="Örn: 175" class="text-input" />
-                        </div>
-
-                        <div class="setting-item">
-                            <label for="weight-kg">Kilo (kg) (opsiyonel)</label>
-                            <input id="weight-kg" type="number" inputmode="numeric" min="25" max="250" placeholder="Örn: 72" class="text-input" />
-                        </div>
-
-                        <div class="setting-item">
-                            <label for="style-select">Stil</label>
-                            <select id="style-select" class="select-input">
-                                <option value="casual" selected>Casual</option>
-                                <option value="sporty">Sporty</option>
-                                <option value="classic">Classic</option>
-                                <option value="street">Street</option>
-                                <option value="minimalist">Minimalist</option>
-                                <option value="formal">Formal</option>
-                            </select>
-                        </div>
-
-                        <div class="setting-item">
-                            <label for="palette-select">Renk Paleti</label>
-                            <select id="palette-select" class="select-input">
-                                <option value="neutral" selected>Neutral</option>
-                                <option value="dark">Dark</option>
-                                <option value="pastel">Pastel</option>
-                                <option value="vibrant">Vibrant</option>
-                            </select>
-                        </div>
-
-                        <div class="setting-item">
-                            <label for="cold-sensitivity-select">Üşüme / Terleme</label>
-                            <select id="cold-sensitivity-select" class="select-input">
-                                <option value="cold">Üşürüm (soğuğa hassas)</option>
-                                <option value="normal" selected>Normal</option>
-                                <option value="warm">Çabuk terlerim</option>
-                            </select>
-                        </div>
-
-                        <div class="setting-item">
-                            <label for="event-type-select">Etkinlik</label>
-                            <select id="event-type-select" class="select-input">
-                                <option value="work" selected>Work</option>
-                                <option value="meeting">Meeting</option>
-                                <option value="class">Class</option>
-                                <option value="outdoors">Outdoors</option>
-                                <option value="sport">Sport</option>
-                                <option value="date">Date</option>
-                                <option value="special">Special</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Center Panel: Outfit Display -->
-            <div class="center-panel">
+            <main class="results">
                 <div class="glass-card mannequin-card">
                     <div class="card-header">
                         <span class="card-icon">👔</span>
@@ -302,19 +330,15 @@
                     </div>
 
                     <div class="mannequin-container">
-                        <!-- Main Outfit Display -->
                         <div class="outfit-display" id="outfit-display">
                             <div class="outfit-image-wrapper">
-                                <img id="outfit-image" src="/static/images/outfits/tisort.png" alt="Kıyafet"
-                                    class="outfit-image">
+                                <img id="outfit-image" src="/static/images/outfits/tisort.png" alt="Kıyafet" class="outfit-image">
                                 <div class="outfit-glow"></div>
                             </div>
 
-                            <!-- Accessory Badge -->
                             <div class="accessory-badge" id="accessory-badge"></div>
                         </div>
 
-                        <!-- Outfit Info -->
                         <div class="outfit-info" id="outfit-info">
                             <span class="outfit-emoji-large" id="outfit-emoji">👕</span>
                             <div class="outfit-text">
@@ -323,7 +347,6 @@
                             </div>
                         </div>
 
-                        <!-- Weather Summary Bar -->
                         <div class="weather-bar" id="weather-bar">
                             <div class="weather-bar-item">
                                 <span class="bar-icon">🌡️</span>
@@ -343,77 +366,97 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Predict Button -->
-                    <button id="predict-btn" class="btn btn-primary btn-large">
-                        <span class="btn-icon">🎯</span>
-                        <span class="btn-text">Kıyafet Öner</span>
-                        <div class="btn-shine"></div>
-                    </button>
                 </div>
-            </div>
 
-            <!-- Right Panel: Results -->
-            <div class="right-panel">
-                <!-- ML Prediction Card -->
-                <div class="glass-card result-card ml-card" id="ml-result-card">
-                    <div class="card-header">
-                        <span class="card-icon">🤖</span>
-                        <h2>ML Model Tahmini</h2>
+                <div class="results-cards">
+                    <div class="glass-card result-card ml-card" id="ml-result-card">
+                        <div class="card-header">
+                            <span class="card-icon">🤖</span>
+                            <h2>ML Model Tahmini</h2>
+                        </div>
+
+                        <div class="result-content" id="ml-result">
+                            <div class="result-placeholder">
+                                <span class="placeholder-icon">🧠</span>
+                                <p>Tahmin bekleniyor...</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="result-content" id="ml-result">
-                        <div class="result-placeholder">
-                            <span class="placeholder-icon">🧠</span>
-                            <p>Tahmin bekleniyor...</p>
+                    <div class="glass-card result-card rule-card" id="rule-result-card">
+                        <div class="card-header">
+                            <span class="card-icon">📋</span>
+                            <h2>Kural Tabanlı</h2>
+                        </div>
+
+                        <div class="result-content" id="rule-result">
+                            <div class="result-placeholder">
+                                <span class="placeholder-icon">📖</span>
+                                <p>Tahmin bekleniyor...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card match-card" id="match-card">
+                        <div id="match-status" class="match-status">
+                            <span class="match-icon">⏳</span>
+                            <span class="match-text">Karşılaştırma bekleniyor</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card result-card selected-card" id="selected-result-card">
+                        <div class="card-header">
+                            <span class="card-icon">✨</span>
+                            <h2>Selected Model</h2>
+                        </div>
+
+                        <div class="result-content" id="selected-result">
+                            <div class="result-placeholder">
+                                <span class="placeholder-icon">🎛️</span>
+                                <p>Model seç ve "Kıyafet Öner" butonuna tıkla.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card result-card comparison-card" id="model-metrics-card">
+                        <div class="card-header">
+                            <span class="card-icon">📈</span>
+                            <h2>Model Comparison</h2>
+                        </div>
+
+                        <div class="result-content" id="model-metrics-content">
+                            <div class="metrics-skeleton" id="model-metrics-loading">
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line"></div>
+                                <div class="skeleton-line"></div>
+                            </div>
+                            <div class="metrics-error hidden" id="model-metrics-error"></div>
+                            <div class="metrics-grid hidden" id="model-metrics-grid"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Rule-based Prediction Card -->
-                <div class="glass-card result-card rule-card" id="rule-result-card">
+                <div class="glass-card outfits-card" id="outfits-card">
                     <div class="card-header">
-                        <span class="card-icon">📋</span>
-                        <h2>Kural Tabanlı</h2>
+                        <span class="card-icon">🧩</span>
+                        <h2>Outfit Önerileri</h2>
                     </div>
 
-                    <div class="result-content" id="rule-result">
-                        <div class="result-placeholder">
-                            <span class="placeholder-icon">📖</span>
-                            <p>Tahmin bekleniyor...</p>
-                        </div>
+                    <div id="outfits-loading" class="outfits-loading hidden">
+                        <div class="spinner"></div>
+                        <p>Öneriler hazırlanıyor...</p>
                     </div>
+
+                    <div id="outfits-error" class="outfits-error hidden"></div>
+
+                    <div id="outfits-placeholder" class="outfits-placeholder">
+                        <span class="placeholder-icon">🪄</span>
+                        <p>Profilini doldur ve "Kıyafet Öner" butonuna tıkla. 5-8 kombin burada listelenecek.</p>
+                    </div>
+
+                    <div id="outfits-grid" class="outfits-grid hidden"></div>
                 </div>
-
-                <!-- Match Status -->
-                <div class="glass-card match-card" id="match-card">
-                    <div id="match-status" class="match-status">
-                        <span class="match-icon">⏳</span>
-                        <span class="match-text">Karşılaştırma bekleniyor</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="glass-card outfits-card" id="outfits-card">
-            <div class="card-header">
-                <span class="card-icon">🧩</span>
-                <h2>Outfit Önerileri</h2>
-            </div>
-
-            <div id="outfits-loading" class="outfits-loading hidden">
-                <div class="spinner"></div>
-                <p>Öneriler hazırlanıyor...</p>
-            </div>
-
-            <div id="outfits-error" class="outfits-error hidden"></div>
-
-            <div id="outfits-placeholder" class="outfits-placeholder">
-                <span class="placeholder-icon">🪄</span>
-                <p>Profilini doldur ve "Kıyafet Öner" butonuna tıkla. 5-8 kombin burada listelenecek.</p>
-            </div>
-
-            <div id="outfits-grid" class="outfits-grid hidden"></div>
+            </main>
         </div>
 
         <!-- Footer -->
@@ -422,6 +465,8 @@
             <p class="footer-sub">Decision Tree, Random Forest & Gradient Boosting ile Hibrit Öneri Sistemi</p>
         </footer>
     </div>
+
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='js/weather-bg.js') }}"></script>

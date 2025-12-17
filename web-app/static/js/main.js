@@ -24,6 +24,13 @@ class OutfitApp {
         this.ruleResult = document.getElementById('rule-result');
         this.matchStatus = document.getElementById('match-status');
 
+        this.modelSelect = document.getElementById('model-select');
+        this.selectedResult = document.getElementById('selected-result');
+
+        this.modelMetricsLoading = document.getElementById('model-metrics-loading');
+        this.modelMetricsError = document.getElementById('model-metrics-error');
+        this.modelMetricsGrid = document.getElementById('model-metrics-grid');
+
         this.genderSelect = document.getElementById('gender-select');
         this.ageRangeSelect = document.getElementById('age-range-select');
         this.heightCmInput = document.getElementById('height-cm');
@@ -47,6 +54,8 @@ class OutfitApp {
         this.bindEvents();
         this.hideLoading();
         this.hideOutfitsLoading();
+
+        this.fetchModelMetrics();
     }
 
     bindEvents() {
@@ -72,6 +81,13 @@ class OutfitApp {
 
         // Predict button
         this.predictBtn.addEventListener('click', () => this.predict());
+
+        if (this.modelSelect) {
+            this.modelSelect.addEventListener('change', () => {
+                const label = this.modelSelect.options[this.modelSelect.selectedIndex]?.textContent || 'Model';
+                this.showToast(`Model: ${label}`, 'info');
+            });
+        }
 
         // Add ripple effect to buttons
         document.querySelectorAll('.btn').forEach(btn => {
@@ -256,6 +272,8 @@ class OutfitApp {
             ortam: this.occasionSelect.value,
             mevsim: this.seasonSelect.value,
 
+            model: this.modelSelect ? this.modelSelect.value : 'best',
+
             gender: this.genderSelect ? this.genderSelect.value : null,
             age_range: this.ageRangeSelect ? this.ageRangeSelect.value : null,
             height_cm: this.heightCmInput ? this.heightCmInput.value : null,
@@ -267,6 +285,7 @@ class OutfitApp {
         };
 
         this.showOutfitsLoading();
+        this.showSelectedLoading();
 
         // Add loading state to button
         this.predictBtn.disabled = true;
@@ -289,14 +308,17 @@ class OutfitApp {
             if (result.success) {
                 this.displayResults(result);
                 this.displayOutfits(result.outfits);
+                this.displaySelectedPrediction(result.selected_prediction, result);
             } else {
                 this.showError('Tahmin yapılamadı: ' + result.error);
                 this.showOutfitsError('Tahmin yapılamadı: ' + result.error);
+                this.showToast('Tahmin yapılamadı', 'error');
             }
         } catch (error) {
             console.error('Prediction error:', error);
             this.showError('Bağlantı hatası. Lütfen tekrar deneyin.');
             this.showOutfitsError('Bağlantı hatası. Lütfen tekrar deneyin.');
+            this.showToast('Bağlantı hatası', 'error');
         } finally {
             this.hideOutfitsLoading();
             // Reset button
@@ -312,7 +334,7 @@ class OutfitApp {
     // Display prediction results
     displayResults(result) {
         // Update outfit display with image
-        const outfitToShow = result.ml_prediction || result.rule_prediction;
+        const outfitToShow = result.selected_prediction || result.ml_prediction || result.rule_prediction;
         if (outfitToShow && window.setOutfitDisplay) {
             window.setOutfitDisplay(
                 outfitToShow.outfit,
@@ -333,11 +355,17 @@ class OutfitApp {
 
         // ML Result
         if (result.ml_prediction) {
+            const confidence = (typeof result.ml_prediction.confidence === 'number')
+                ? `${Math.round(result.ml_prediction.confidence * 100)}%`
+                : null;
+            const explanation = result.ml_prediction.explanation ? this.escapeHtml(result.ml_prediction.explanation) : null;
             this.mlResult.innerHTML = `
                 <div class="result-outfit">
                     <span class="result-emoji">${result.ml_prediction.emoji}</span>
                     <div class="result-name">${this.formatOutfitName(result.ml_prediction.outfit)}</div>
                     <div class="result-desc">${result.ml_prediction.description}</div>
+                    ${confidence ? `<div class="result-confidence">Confidence: <strong>${confidence}</strong></div>` : ''}
+                    ${explanation ? `<div class="result-explanation">${explanation}</div>` : ''}
                     <div class="result-model" style="font-size: 0.75rem; opacity: 0.6; margin-top: 8px;">
                         Model: ${result.ml_prediction.model_name}
                     </div>
@@ -353,11 +381,13 @@ class OutfitApp {
         }
 
         // Rule Result
+        const ruleExplanation = result.rule_prediction.explanation ? this.escapeHtml(result.rule_prediction.explanation) : null;
         this.ruleResult.innerHTML = `
             <div class="result-outfit">
                 <span class="result-emoji">${result.rule_prediction.emoji}</span>
                 <div class="result-name">${this.formatOutfitName(result.rule_prediction.outfit)}</div>
                 <div class="result-desc">${result.rule_prediction.description}</div>
+                ${ruleExplanation ? `<div class="result-explanation">${ruleExplanation}</div>` : ''}
             </div>
         `;
 
@@ -486,6 +516,135 @@ class OutfitApp {
         `;
         this.weatherPlaceholder.classList.remove('hidden');
         this.weatherDisplay.classList.add('hidden');
+    }
+
+    showSelectedLoading() {
+        if (!this.selectedResult) return;
+        this.selectedResult.innerHTML = `
+            <div class="metrics-skeleton">
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line"></div>
+            </div>
+        `;
+    }
+
+    displaySelectedPrediction(selected) {
+        if (!this.selectedResult) return;
+
+        if (!selected || !selected.outfit) {
+            this.selectedResult.innerHTML = `
+                <div class="result-placeholder">
+                    <span class="placeholder-icon">⚠️</span>
+                    <p>Selected model çıktısı alınamadı.</p>
+                </div>
+            `;
+            return;
+        }
+
+        const modelName = this.escapeHtml(selected.model_name || 'Selected');
+        const outfit = this.escapeHtml(this.formatOutfitName(selected.outfit));
+        const emoji = this.escapeHtml(selected.emoji || '✨');
+        const desc = this.escapeHtml(selected.description || '');
+        const explanation = selected.explanation ? this.escapeHtml(selected.explanation) : '';
+        const confidence = (typeof selected.confidence === 'number')
+            ? `${Math.round(selected.confidence * 100)}%`
+            : null;
+
+        this.selectedResult.innerHTML = `
+            <div class="result-outfit">
+                <span class="result-emoji">${emoji}</span>
+                <div class="result-name">${outfit}</div>
+                <div class="result-desc">${desc}</div>
+                ${confidence ? `<div class="result-confidence">Confidence: <strong>${confidence}</strong></div>` : ''}
+                ${explanation ? `<div class="result-explanation">${explanation}</div>` : ''}
+                <div class="result-model" style="font-size: 0.75rem; opacity: 0.6; margin-top: 8px;">Model: ${modelName}</div>
+            </div>
+        `;
+
+        const picked = this.modelSelect ? this.modelSelect.value : null;
+        if (picked && picked !== 'best') {
+            this.showToast(`Selected: ${modelName}`, 'success');
+        }
+    }
+
+    async fetchModelMetrics() {
+        if (!this.modelMetricsLoading || !this.modelMetricsGrid || !this.modelMetricsError) return;
+
+        this.modelMetricsError.classList.add('hidden');
+        this.modelMetricsGrid.classList.add('hidden');
+        this.modelMetricsLoading.classList.remove('hidden');
+
+        try {
+            const resp = await fetch('/api/model-metrics');
+            const payload = await resp.json();
+            if (!payload.success) {
+                throw new Error(payload.error || 'metrics error');
+            }
+            this.renderModelMetrics(payload.metrics);
+        } catch (e) {
+            this.modelMetricsError.textContent = 'Model metrikleri yüklenemedi.';
+            this.modelMetricsError.classList.remove('hidden');
+        } finally {
+            this.modelMetricsLoading.classList.add('hidden');
+        }
+    }
+
+    renderModelMetrics(metrics) {
+        if (!this.modelMetricsGrid || !this.modelMetricsError) return;
+        if (!metrics || !metrics.models) {
+            this.modelMetricsError.textContent = 'Model metrikleri bulunamadı.';
+            this.modelMetricsError.classList.remove('hidden');
+            return;
+        }
+
+        const models = metrics.models;
+        const order = ['rules', 'xgboost', 'random_forest', 'mlp'];
+
+        const entries = Object.keys(models)
+            .sort((a, b) => {
+                const ia = order.indexOf(a);
+                const ib = order.indexOf(b);
+                return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+            })
+            .map((k) => ({ key: k, v: models[k] }));
+
+        const best = metrics.best_model ? String(metrics.best_model) : null;
+
+        const cards = entries
+            .map(({ key, v }) => {
+                const name = this.escapeHtml(v.display_name || key);
+                const acc = (typeof v.accuracy === 'number') ? `${(v.accuracy * 100).toFixed(1)}%` : '--';
+                const f1 = (typeof v.macro_f1 === 'number') ? `${(v.macro_f1 * 100).toFixed(1)}%` : '--';
+                const isBest = best && (best === key);
+
+                return `
+                    <div class="metric-card ${isBest ? 'is-best' : ''}">
+                        <div class="metric-title">${name}${isBest ? ' <span class="best-badge">Best</span>' : ''}</div>
+                        <div class="metric-row"><span>Accuracy</span><strong>${acc}</strong></div>
+                        <div class="metric-row"><span>Macro F1</span><strong>${f1}</strong></div>
+                    </div>
+                `;
+            })
+            .join('');
+
+        this.modelMetricsGrid.innerHTML = cards;
+        this.modelMetricsGrid.classList.remove('hidden');
+    }
+
+    showToast(message, type) {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type || 'info'}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('toast-hide');
+            setTimeout(() => toast.remove(), 250);
+        }, 2200);
     }
 
     showOutfitsLoading() {
