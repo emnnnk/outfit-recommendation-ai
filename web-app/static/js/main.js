@@ -65,6 +65,7 @@ class OutfitApp {
         this.seasonManuallyChanged = false;
         this.currentOutfits = [];
         this.selectedOutfitIndex = 0;
+        this.activeCity = null;
 
         // Initialize
         this.bindEvents();
@@ -74,6 +75,105 @@ class OutfitApp {
         this.fetchModelMetrics();
 
         this.applyInitialSidebarState();
+    }
+
+    getCurrentThemeKey() {
+        const season = this.seasonSelect?.value || '';
+        const temp = parseFloat(this.tempSlider?.value || '20');
+        const rain = this.rainSelect?.value || 'yok';
+        const eventType = this.eventTypeSelect?.value || '';
+        const style = this.styleSelect?.value || '';
+
+        if (season === 'kış' || temp <= 8) return 'winter';
+        if (season === 'yaz' || temp >= 24) return 'summer';
+        if (rain === 'var') return 'rainy';
+        if (eventType === 'work' || eventType === 'meeting') return 'work';
+        if (style === 'formal' || eventType === 'special' || eventType === 'date') return 'formal';
+        return 'casual';
+    }
+
+    themedOutfitSlots() {
+        return [
+            { key: 'winter', title: 'Winter', board: 'winter.svg', accent: '#38ef7d' },
+            { key: 'summer', title: 'Summer', board: 'summer.svg', accent: '#f59e0b' },
+            { key: 'rainy', title: 'Rainy', board: 'rainy.svg', accent: '#4facfe' },
+            { key: 'work', title: 'Work', board: 'business.svg', accent: '#667eea' },
+            { key: 'casual', title: 'Casual', board: 'street.svg', accent: '#ec4899' },
+            { key: 'formal', title: 'Formal', board: 'formal.svg', accent: '#a855f7' },
+        ];
+    }
+
+    scoreOutfitForTheme(outfit, themeKey) {
+        const reasons = Array.isArray(outfit?.reasons) ? outfit.reasons.join(' ').toLowerCase() : '';
+        const title = String(outfit?.title || '').toLowerCase();
+        const pieces = Array.isArray(outfit?.pieces) ? outfit.pieces : [];
+
+        const hasOuterwear = Boolean(outfit?.avatar_layers?.outerwear);
+        const hasAccessory = Boolean(outfit?.avatar_layers?.accessory);
+
+        const hasKeyword = (kw) => (title.includes(kw) || reasons.includes(kw));
+        const hasPieceCategory = (cat) => pieces.some((p) => String(p?.category || '').toLowerCase() === cat);
+
+        let s = 0;
+        if (themeKey === 'winter') {
+            if (hasOuterwear) s += 4;
+            if (hasKeyword('kış') || hasKeyword('winter') || hasKeyword('soğuk') || hasKeyword('mont') || hasKeyword('ceket')) s += 3;
+        }
+        if (themeKey === 'summer') {
+            if (!hasOuterwear) s += 2;
+            if (hasKeyword('yaz') || hasKeyword('summer') || hasKeyword('serin') || hasKeyword('tişört') || hasKeyword('şort')) s += 3;
+        }
+        if (themeKey === 'rainy') {
+            if (hasAccessory) s += 4;
+            if (hasKeyword('yağmur') || hasKeyword('rain') || hasKeyword('umbrella') || hasKeyword('şemsiye')) s += 3;
+        }
+        if (themeKey === 'work') {
+            if (hasKeyword('work') || hasKeyword('iş') || hasKeyword('meeting') || hasKeyword('office') || hasKeyword('gömlek')) s += 3;
+        }
+        if (themeKey === 'formal') {
+            if (hasKeyword('formal') || hasKeyword('özel') || hasKeyword('special') || hasKeyword('date') || hasKeyword('klasik')) s += 3;
+        }
+        if (themeKey === 'casual') {
+            if (hasKeyword('casual') || hasKeyword('günlük') || hasKeyword('street') || hasKeyword('rahat')) s += 3;
+        }
+
+        // Prefer full outfits with at least top/bottom/shoes
+        if (hasPieceCategory('top')) s += 1;
+        if (hasPieceCategory('bottom')) s += 1;
+        if (hasPieceCategory('shoes')) s += 1;
+
+        return s;
+    }
+
+    buildThemedOutfits(outfits) {
+        const list = Array.isArray(outfits) ? outfits : [];
+        const slots = this.themedOutfitSlots();
+
+        const used = new Set();
+        const picked = slots.map((slot) => {
+            const ranked = list
+                .map((o, idx) => ({ o, idx, s: this.scoreOutfitForTheme(o, slot.key) }))
+                .sort((a, b) => b.s - a.s);
+
+            let chosen = ranked.find((x) => !used.has(x.idx)) || ranked[0] || null;
+            if (chosen) used.add(chosen.idx);
+
+            return {
+                ...slot,
+                outfit: chosen ? chosen.o : null,
+                sourceIndex: chosen ? chosen.idx : -1,
+            };
+        });
+
+        // If backend returns fewer than slots, fill deterministically
+        for (let i = 0; i < picked.length; i++) {
+            if (picked[i].outfit) continue;
+            const fallback = list[i % Math.max(1, list.length)] || null;
+            picked[i].outfit = fallback;
+            picked[i].sourceIndex = i % Math.max(1, list.length);
+        }
+
+        return picked;
     }
 
     bindEvents() {
@@ -198,8 +298,10 @@ class OutfitApp {
 
             if (data.success) {
                 this.weatherData = data.data;
+                this.activeCity = data.data.city || city;
                 this.displayWeather(data.data);
                 this.updateFormFromWeather(data.data);
+                this.updateActiveCityChip();
 
                 // Update weather background
                 if (window.setWeatherBackground) {
@@ -356,6 +458,7 @@ class OutfitApp {
                 this.displayOutfits(result.outfits);
                 this.displaySelectedPrediction(result.selected_prediction, result);
                 this.setOutfits(result.outfits);
+                this.updateActiveCityChip();
                 this.showToast('Öneriler hazır', 'success');
             } else {
                 this.showError('Tahmin yapılamadı: ' + result.error);
@@ -382,25 +485,7 @@ class OutfitApp {
 
     // Display prediction results
     displayResults(result) {
-        // Update outfit display with image
-        const outfitToShow = result.selected_prediction || result.ml_prediction || result.rule_prediction;
-        if (outfitToShow && window.setOutfitDisplay) {
-            window.setOutfitDisplay(
-                outfitToShow.outfit,
-                outfitToShow.description,
-                outfitToShow.emoji
-            );
-        }
-
-        // Update weather bar
-        if (window.updateWeatherBar) {
-            window.updateWeatherBar(
-                this.tempSlider.value,
-                this.rainSelect.value,
-                this.windSelect.value,
-                this.seasonSelect.value
-            );
-        }
+        // Single academic summary: fill the existing summary blocks (selected/ml/rules/match)
 
         // ML Result
         if (result.ml_prediction) {
@@ -479,14 +564,23 @@ class OutfitApp {
         this.outfitsPlaceholder.classList.add('hidden');
         this.outfitsGrid.classList.remove('hidden');
 
-        const cardsHtml = outfits
-            .map((o, idx) => {
-                const title = this.escapeHtml(o.title || `Outfit #${idx + 1}`);
+        const themed = this.buildThemedOutfits(outfits);
+        const currentTheme = this.getCurrentThemeKey();
+        const heroOnError = this.imgOnErrorTo(this.defaultBoardImage());
+
+        const cardsHtml = themed
+            .map((slot, visualIdx) => {
+                const o = slot.outfit || {};
                 const reasons = Array.isArray(o.reasons) ? o.reasons : [];
                 const pieces = Array.isArray(o.pieces) ? o.pieces : [];
 
-                const hero = this.escapeHtml(this.getBoardImageUrl(o, idx));
-                const heroOnError = this.imgOnErrorTo(this.defaultBoardImage());
+                const title = this.escapeHtml(slot.title);
+                const subtitle = this.escapeHtml(this.generateOutfitSubtitle(pieces) || '');
+                const accent = slot.accent;
+                const hero = `/static/images/boards/${slot.board}`;
+
+                const isBest = slot.key === currentTheme;
+                const bestBadge = isBest ? `<div class="best-city-badge">Best for Current City</div>` : '';
 
                 const chipsHtml = reasons
                     .slice(0, 4)
@@ -494,13 +588,13 @@ class OutfitApp {
                     .join('');
 
                 const piecesHtml = pieces
+                    .slice(0, 6)
                     .map((p) => {
                         const labelRaw = p.label || p.category || 'Parça';
                         const label = this.escapeHtml(labelRaw);
                         const categoryRaw = p.category || '';
                         const category = this.escapeHtml(categoryRaw);
                         const img = this.escapeHtml(this.resolvePieceImage(p));
-                        const link = this.escapeHtml(p.shop_link || p.link || '#');
                         const onError = this.imgOnErrorTo(this.categoryFallbackImage(categoryRaw));
 
                         return `
@@ -510,7 +604,6 @@ class OutfitApp {
                                     <div class="piece-mini-title">${label}</div>
                                     <div class="piece-mini-meta">
                                         <span class="piece-mini-cat">${category}</span>
-                                        <a class="shop-mini" href="${link}" target="_blank" rel="noopener noreferrer" aria-label="Boyner">B</a>
                                     </div>
                                 </div>
                             </div>
@@ -519,20 +612,16 @@ class OutfitApp {
                     .join('');
 
                 return `
-                    <article class="pin-card" data-outfit-index="${idx}">
+                    <article class="pin-card ${isBest ? 'is-best-for-city' : ''}" data-outfit-index="${slot.sourceIndex}" data-theme="${slot.key}" style="--accent: ${accent}">
                         <div class="pin-hero">
                             <img src="${hero}" alt="${title}" loading="lazy" ${heroOnError} />
+                            ${bestBadge}
                         </div>
                         <div class="pin-body">
                             <div class="pin-title">${title}</div>
+                            <div class="pin-subtitle">${subtitle}</div>
                             <div class="chip-row">${chipsHtml}</div>
-                            <details class="pieces-details">
-                                <summary>
-                                    <span>Pieces</span>
-                                    <span style="opacity:0.7">⌄</span>
-                                </summary>
-                                <div class="pieces-row">${piecesHtml}</div>
-                            </details>
+                            <div class="pieces-row">${piecesHtml}</div>
                         </div>
                     </article>
                 `;
@@ -542,6 +631,13 @@ class OutfitApp {
         this.outfitsGrid.innerHTML = cardsHtml;
 
         this.setOutfits(outfits);
+
+        // Auto-select the best-for-current-city theme so the avatar and highlight match the current weather.
+        const bestSlot = themed.find((s) => s && s.key === currentTheme);
+        const bestIdx = bestSlot ? bestSlot.sourceIndex : -1;
+        if (Number.isFinite(bestIdx) && bestIdx >= 0) {
+            this.selectOutfitIndex(bestIdx);
+        }
     }
 
     avatarAsset(name) {
@@ -620,7 +716,6 @@ class OutfitApp {
             const label = this.escapeHtml(p.label || p.category || 'Parça');
             const category = this.escapeHtml(p.category || '');
             const img = this.escapeHtml(this.resolvePieceImage(p));
-            const link = this.escapeHtml(p.shop_link || p.link || '#');
             const onError = this.imgOnErrorTo(this.categoryFallbackImage(p.category || 'top'));
 
             return `
@@ -630,12 +725,24 @@ class OutfitApp {
                         <div class="avatar-piece-title">${label}</div>
                         <div class="avatar-piece-sub">${category}</div>
                     </div>
-                    <a class="avatar-shop" href="${link}" target="_blank" rel="noopener noreferrer">Shop</a>
                 </div>
             `;
         });
 
         this.avatarPieces.innerHTML = rows.join('');
+    }
+
+    updateActiveCityChip() {
+        const chipContainer = document.getElementById('active-city-chip-container');
+        if (!chipContainer) return;
+
+        if (this.activeCity) {
+            chipContainer.innerHTML = `<div class="active-city-chip">Active: ${this.escapeHtml(this.activeCity)}</div>`;
+            chipContainer.classList.remove('hidden');
+        } else {
+            chipContainer.innerHTML = '';
+            chipContainer.classList.add('hidden');
+        }
     }
 
     applyInitialSidebarState() {
@@ -699,6 +806,27 @@ class OutfitApp {
     imgOnErrorTo(url) {
         const safe = this.escapeHtml(url);
         return `onerror="this.onerror=null;this.src='${safe}';"`;
+    }
+
+    generateOutfitSubtitle(pieces) {
+        if (!Array.isArray(pieces) || pieces.length === 0) {
+            return 'Complete outfit';
+        }
+        
+        const labels = pieces.slice(0, 3).map(p => p.label || p.category).filter(Boolean);
+        if (labels.length === 0) return 'Stylish combination';
+        
+        return labels.join(' + ');
+    }
+
+    getVariedBoardImageUrl(outfit, idx) {
+        if (outfit && outfit.board_image) {
+            return String(outfit.board_image);
+        }
+
+        const boardKeys = ['winter', 'summer', 'classic', 'minimalist', 'business', 'street', 'outdoors', 'rainy', 'date', 'sporty', 'default'];
+        const key = boardKeys[idx % boardKeys.length];
+        return `/static/images/boards/${key}.svg`;
     }
 
     getBoardImageUrl(outfit, idx) {
@@ -854,28 +982,54 @@ class OutfitApp {
         }
 
         const models = metrics.models;
-        const order = ['rules', 'xgboost', 'random_forest', 'mlp'];
+        const canonical = [
+            { key: 'rules', display_name: 'Rules (Baseline)', group: 'rule' },
+            { key: 'xgboost', display_name: 'RandomForest / XGBoost', group: 'ml' },
+            { key: 'random_forest', display_name: 'Random Forest', group: 'ml' },
+            { key: 'mlp', display_name: 'sklearn MLP', group: 'ml' },
+            { key: 'ann', display_name: 'ANN (PyTorch)', group: 'deep' },
+            { key: 'cnn1d', display_name: 'CNN1D (PyTorch)', group: 'deep' },
+            { key: 'lstm', display_name: 'LSTM (PyTorch)', group: 'deep' },
+        ];
 
-        const entries = Object.keys(models)
-            .sort((a, b) => {
-                const ia = order.indexOf(a);
-                const ib = order.indexOf(b);
-                return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
-            })
-            .map((k) => ({ key: k, v: models[k] }));
+        const entries = canonical.map((c) => {
+            const v = models[c.key] || { display_name: c.display_name };
+            return { key: c.key, v, group: c.group, fallbackName: c.display_name };
+        });
 
         const best = metrics.best_model ? String(metrics.best_model) : null;
 
         const cards = entries
-            .map(({ key, v }) => {
-                const name = this.escapeHtml(v.display_name || key);
+            .map(({ key, v, group, fallbackName }) => {
+                const name = this.escapeHtml(v.display_name || fallbackName || key);
                 const acc = (typeof v.accuracy === 'number') ? `${(v.accuracy * 100).toFixed(1)}%` : '--';
                 const f1 = (typeof v.macro_f1 === 'number') ? `${(v.macro_f1 * 100).toFixed(1)}%` : '--';
                 const isBest = best && (best === key);
+                
+                // Determine model type badge
+                let typeBadge = '';
+                if (group === 'rule' || key === 'rules') {
+                    typeBadge = '<span class="model-type-badge badge-rule">Rule</span>';
+                } else if (group === 'ml' || ['xgboost', 'random_forest', 'mlp'].includes(key)) {
+                    typeBadge = '<span class="model-type-badge badge-ml">ML</span>';
+                } else if (group === 'deep' || ['ann', 'cnn1d', 'lstm'].includes(key)) {
+                    typeBadge = '<span class="model-type-badge badge-deep">Deep Learning</span>';
+                }
+                
+                // Experimental badge for CNN1D and LSTM
+                const isExperimental = ['cnn1d', 'lstm'].includes(key);
+                const expBadge = isExperimental ? '<span class="model-type-badge badge-experimental">Experimental</span>' : '';
 
                 return `
                     <div class="metric-card ${isBest ? 'is-best' : ''}">
-                        <div class="metric-title">${name}${isBest ? ' <span class="best-badge">Best</span>' : ''}</div>
+                        <div class="metric-title">
+                            ${name}
+                            ${isBest ? ' <span class="best-badge">Best</span>' : ''}
+                        </div>
+                        <div class="metric-badges">
+                            ${typeBadge}
+                            ${expBadge}
+                        </div>
                         <div class="metric-row"><span>Accuracy</span><strong>${acc}</strong></div>
                         <div class="metric-row"><span>Macro F1</span><strong>${f1}</strong></div>
                     </div>

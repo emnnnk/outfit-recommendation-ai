@@ -341,48 +341,63 @@
             </aside>
 
             <main class="results">
-                <div class="glass-card mannequin-card">
+
+                <div class="glass-card result-card comparison-card" id="model-metrics-card">
                     <div class="card-header">
-                        <span class="card-icon">👔</span>
-                        <h2>Kıyafet Görünümü</h2>
+                        <span class="card-icon">📈</span>
+                        <h2>Model Comparison / Model Zoo</h2>
                     </div>
 
-                    <div class="mannequin-container">
-                        <div class="outfit-display" id="outfit-display">
-                            <div class="outfit-image-wrapper">
-                                <img id="outfit-image" src="/static/images/outfits/tisort.png" alt="Kıyafet" class="outfit-image">
-                                <div class="outfit-glow"></div>
+                    <div class="result-content" id="model-metrics-content">
+                        <div class="metrics-skeleton" id="model-metrics-loading">
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line"></div>
+                        </div>
+                        <div class="metrics-error hidden" id="model-metrics-error"></div>
+                        <div class="metrics-grid hidden" id="model-metrics-grid"></div>
+                    </div>
+                </div>
+
+                <div class="glass-card prediction-summary-card" id="prediction-summary-card">
+                    <div class="card-header">
+                        <span class="card-icon">🧾</span>
+                        <h2>Prediction Summary</h2>
+                    </div>
+
+                    <div class="prediction-summary-grid">
+                        <section class="prediction-summary-block">
+                            <h3 class="prediction-section-title">Selected Prediction</h3>
+                            <div class="result-content" id="selected-result">
+                                <div class="result-placeholder">
+                                    <span class="placeholder-icon">🎛️</span>
+                                    <p>Model seç ve "Kıyafet Öner" butonuna tıkla.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="prediction-summary-block">
+                            <h3 class="prediction-section-title">Per-Model Outputs</h3>
+                            <div class="prediction-mini-grid">
+                                <div class="result-content" id="ml-result">
+                                    <div class="result-placeholder">
+                                        <span class="placeholder-icon">🧠</span>
+                                        <p>Tahmin bekleniyor...</p>
+                                    </div>
+                                </div>
+                                <div class="result-content" id="rule-result">
+                                    <div class="result-placeholder">
+                                        <span class="placeholder-icon">📖</span>
+                                        <p>Tahmin bekleniyor...</p>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="accessory-badge" id="accessory-badge"></div>
-                        </div>
-
-                        <div class="outfit-info" id="outfit-info">
-                            <span class="outfit-emoji-large" id="outfit-emoji">👕</span>
-                            <div class="outfit-text">
-                                <span class="outfit-name" id="outfit-name">Tişört</span>
-                                <span class="outfit-desc" id="outfit-desc">Kıyafet önermek için butona tıklayın</span>
+                            <div id="match-status" class="match-status">
+                                <span class="match-icon">⏳</span>
+                                <span class="match-text">Karşılaştırma bekleniyor</span>
                             </div>
-                        </div>
-
-                        <div class="weather-bar" id="weather-bar">
-                            <div class="weather-bar-item">
-                                <span class="bar-icon">🌡️</span>
-                                <span class="bar-value" id="bar-temp">--°C</span>
-                            </div>
-                            <div class="weather-bar-item">
-                                <span class="bar-icon">🌧️</span>
-                                <span class="bar-value" id="bar-rain">--</span>
-                            </div>
-                            <div class="weather-bar-item">
-                                <span class="bar-icon">💨</span>
-                                <span class="bar-value" id="bar-wind">--</span>
-                            </div>
-                            <div class="weather-bar-item">
-                                <span class="bar-icon">🗓️</span>
-                                <span class="bar-value" id="bar-season">--</span>
-                            </div>
-                        </div>
+                        </section>
                     </div>
                 </div>
 
@@ -404,78 +419,6 @@
                             <img id="avatar-highlight" src="/static/images/avatar/highlight.svg" alt="" class="avatar-layer avatar-highlight" />
                         </div>
                     </div>
-
-                    <div class="avatar-pieces" id="avatar-pieces">
-                        <div class="avatar-pieces-placeholder">Bir kombin seçildiğinde parçalar burada görünecek.</div>
-                    </div>
-                </div>
-
-                <div class="results-cards">
-                    <div class="glass-card result-card ml-card" id="ml-result-card">
-                        <div class="card-header">
-                            <span class="card-icon">🤖</span>
-                            <h2>ML Model Tahmini</h2>
-                        </div>
-
-                        <div class="result-content" id="ml-result">
-                            <div class="result-placeholder">
-                                <span class="placeholder-icon">🧠</span>
-                                <p>Tahmin bekleniyor...</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="glass-card result-card rule-card" id="rule-result-card">
-                        <div class="card-header">
-                            <span class="card-icon">📋</span>
-                            <h2>Kural Tabanlı</h2>
-                        </div>
-
-                        <div class="result-content" id="rule-result">
-                            <div class="result-placeholder">
-                                <span class="placeholder-icon">📖</span>
-                                <p>Tahmin bekleniyor...</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="glass-card match-card" id="match-card">
-                        <div id="match-status" class="match-status">
-                            <span class="match-icon">⏳</span>
-                            <span class="match-text">Karşılaştırma bekleniyor</span>
-                        </div>
-                    </div>
-
-                    <div class="glass-card result-card selected-card" id="selected-result-card">
-                        <div class="card-header">
-                            <span class="card-icon">✨</span>
-                            <h2>Selected Model</h2>
-                        </div>
-
-                        <div class="result-content" id="selected-result">
-                            <div class="result-placeholder">
-                                <span class="placeholder-icon">🎛️</span>
-                                <p>Model seç ve "Kıyafet Öner" butonuna tıkla.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="glass-card result-card comparison-card" id="model-metrics-card">
-                        <div class="card-header">
-                            <span class="card-icon">📈</span>
-                            <h2>Model Comparison</h2>
-                        </div>
-
-                        <div class="result-content" id="model-metrics-content">
-                            <div class="metrics-skeleton" id="model-metrics-loading">
-                                <div class="skeleton-line"></div>
-                                <div class="skeleton-line"></div>
-                                <div class="skeleton-line"></div>
-                            </div>
-                            <div class="metrics-error hidden" id="model-metrics-error"></div>
-                            <div class="metrics-grid hidden" id="model-metrics-grid"></div>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="glass-card outfits-card" id="outfits-card">
@@ -483,6 +426,8 @@
                         <span class="card-icon">🧩</span>
                         <h2>Outfit Önerileri</h2>
                     </div>
+
+                    <div id="active-city-chip-container" class="hidden"></div>
 
                     <div id="outfits-loading" class="outfits-loading hidden">
                         <div class="spinner"></div>
@@ -512,7 +457,6 @@
 
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='js/weather-bg.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/mannequin.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 
