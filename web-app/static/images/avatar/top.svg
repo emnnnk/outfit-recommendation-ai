@@ -1,11 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#667eea"/>
-      <stop offset="1" stop-color="#4facfe"/>
+    <linearGradient id="topGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5a7fb8"/>
+      <stop offset="100%" stop-color="#3d5a80"/>
     </linearGradient>
+    <filter id="topShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <!-- stylized top garment overlay -->
-  <path d="M270 330 C320 280, 580 280, 630 330 C700 400, 720 520, 700 640 C690 700, 620 720, 450 720 C280 720, 210 700, 200 640 C180 520, 200 400, 270 330 Z" fill="url(#g)" opacity="0.92"/>
-  <path d="M305 360 C335 325, 565 325, 595 360" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="14" stroke-linecap="round"/>
+  
+  <!-- T-shirt body -->
+  <path d="M 280 300 Q 290 285 310 280 L 350 270 Q 380 265 450 265 Q 520 265 550 270 L 590 280 Q 610 285 620 300 L 680 340 Q 690 350 695 365 L 710 420 Q 715 450 715 480 L 715 620 Q 715 660 710 680 L 700 710 Q 695 720 685 725 L 650 740 Q 620 750 580 755 L 520 760 Q 480 762 450 762 Q 420 762 380 760 L 320 755 Q 280 750 250 740 L 215 725 Q 205 720 200 710 L 190 680 Q 185 660 185 620 L 185 480 Q 185 450 190 420 L 205 365 Q 210 350 220 340 Z" 
+        fill="url(#topGrad)" 
+        filter="url(#topShadow)"
+        opacity="0.95"/>
+  
+  <!-- Sleeves -->
+  <path d="M 280 300 Q 250 320 230 360 L 210 420 Q 205 450 210 480 L 220 520 Q 225 540 235 555 L 250 575 Q 260 585 275 590 L 290 595 Q 300 595 305 585 L 310 570 Q 312 550 310 530 L 305 480 Q 300 430 295 390 L 290 350 Q 288 330 285 315 Z" 
+        fill="url(#topGrad)" 
+        opacity="0.92"/>
+  <path d="M 620 300 Q 650 320 670 360 L 690 420 Q 695 450 690 480 L 680 520 Q 675 540 665 555 L 650 575 Q 640 585 625 590 L 610 595 Q 600 595 595 585 L 590 570 Q 588 550 590 530 L 595 480 Q 600 430 605 390 L 610 350 Q 612 330 615 315 Z" 
+        fill="url(#topGrad)" 
+        opacity="0.92"/>
+  
+  <!-- Neckline -->
+  <ellipse cx="450" cy="285" rx="45" ry="20" fill="rgba(0,0,0,0.15)"/>
+  
+  <!-- Subtle fabric details -->
+  <path d="M 350 400 Q 450 405 550 400" stroke="rgba(255,255,255,0.08)" stroke-width="2" fill="none"/>
+  <path d="M 340 500 Q 450 505 560 500" stroke="rgba(255,255,255,0.08)" stroke-width="2" fill="none"/>
+  <path d="M 330 600 Q 450 605 570 600" stroke="rgba(255,255,255,0.08)" stroke-width="2" fill="none"/>
 </svg>

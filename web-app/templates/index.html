@@ -408,15 +408,27 @@
                     </div>
 
                     <div class="avatar-wrap">
-                        <div id="avatar-stage" class="avatar-stage" aria-label="Avatar Preview">
+                        <div id="avatar-stage" class="avatar-stage" aria-label="Avatar Preview" data-model-url="/static/models/avatar.glb">
+                            <div id="avatar-3d-canvas" class="avatar-3d-canvas" aria-hidden="true"></div>
+                            <div id="avatar-3d-status" class="avatar-3d-status hidden">
+                                <div class="spinner"></div>
+                                <p>3D avatar yükleniyor...</p>
+                            </div>
                             <img id="avatar-shadow" src="/static/images/avatar/shadow.svg" alt="" class="avatar-layer avatar-shadow" />
                             <img id="avatar-body" src="/static/images/avatar/body.svg" alt="" class="avatar-layer avatar-body" />
                             <img id="avatar-bottom" src="/static/images/avatar/bottom.svg" alt="" class="avatar-layer avatar-bottom" />
                             <img id="avatar-top" src="/static/images/avatar/top.svg" alt="" class="avatar-layer avatar-top" />
+
                             <img id="avatar-outerwear" src="/static/images/avatar/outerwear.svg" alt="" class="avatar-layer avatar-outerwear hidden" />
                             <img id="avatar-shoes" src="/static/images/avatar/shoes.svg" alt="" class="avatar-layer avatar-shoes" />
                             <img id="avatar-accessory" src="/static/images/avatar/accessory.svg" alt="" class="avatar-layer avatar-accessory hidden" />
                             <img id="avatar-highlight" src="/static/images/avatar/highlight.svg" alt="" class="avatar-layer avatar-highlight" />
+                            
+                            <!-- Customize Avatar Button -->
+                            <button id="avatar-custom-btn" class="btn-avatar-custom" title="Kendi avatarını oluştur">
+                                <span>✏️</span>
+                                <span>Customize</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -455,9 +467,18 @@
 
     <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
+    <!-- Ready Player Me Modal -->
+    <div id="rpm-modal" class="rpm-modal" aria-hidden="true">
+        <div class="rpm-container">
+            <button id="rpm-close" class="rpm-close" aria-label="Close">&times;</button>
+            <iframe id="rpm-iframe" class="rpm-iframe" allow="camera *; microphone *; clipboard-write" title="Avatar Creator"></iframe>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='js/weather-bg.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/avatar-3d-viewer.js') }}"></script>
 </body>
 
 </html>

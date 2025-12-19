@@ -1,11 +1,47 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#f093fb"/>
-      <stop offset="1" stop-color="#f5576c"/>
+    <linearGradient id="umbrellaGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e74c3c"/>
+      <stop offset="50%" stop-color="#c0392b"/>
+      <stop offset="100%" stop-color="#e74c3c"/>
     </linearGradient>
+    <filter id="umbrellaShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="2" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <!-- accessory overlay (small accent near shoulder) -->
-  <path d="M640 370 C700 330, 760 360, 770 420 C780 482, 720 520, 670 495 C632 476, 610 422, 640 370 Z" fill="url(#g)" opacity="0.90"/>
-  <path d="M662 400 C685 380, 720 392, 722 425 C724 455, 690 468, 672 452 C656 438, 648 416, 662 400 Z" fill="rgba(255,255,255,0.30)"/>
+  
+  <!-- Umbrella (closed, held at side) -->
+  <g filter="url(#umbrellaShadow)">
+    <!-- Handle -->
+    <path d="M 720 850 Q 722 860 720 870 L 715 890 Q 712 900 705 905 L 695 910 Q 688 912 682 910 L 675 905 Q 672 900 672 895 L 673 885 Q 675 875 678 865 L 682 855 Q 685 850 690 848 L 700 845 Q 710 845 715 848 Z" 
+          fill="#2c3e50" 
+          opacity="0.95"/>
+    
+    <!-- Shaft -->
+    <rect x="695" y="450" width="8" height="400" rx="4" 
+          fill="#34495e" 
+          opacity="0.94"/>
+    
+    <!-- Tip -->
+    <path d="M 695 445 L 699 430 L 703 445 Z" 
+          fill="#7f8c8d" 
+          opacity="0.9"/>
+    
+    <!-- Canopy (closed) -->
+    <path d="M 690 460 Q 688 465 688 472 L 689 490 Q 690 500 693 508 L 697 520 Q 700 528 704 532 L 708 535 Q 710 536 712 535 L 716 532 Q 720 528 723 520 L 727 508 Q 730 500 731 490 L 732 472 Q 732 465 730 460 L 725 455 Q 720 452 710 452 Q 700 452 695 455 Z" 
+          fill="url(#umbrellaGrad)" 
+          opacity="0.92"/>
+    
+    <!-- Strap -->
+    <path d="M 705 520 Q 710 522 715 520 L 720 515 Q 722 510 720 505 L 715 500 Q 710 498 705 500 L 700 505 Q 698 510 700 515 Z" 
+          fill="rgba(0,0,0,0.3)"/>
+  </g>
 </svg>

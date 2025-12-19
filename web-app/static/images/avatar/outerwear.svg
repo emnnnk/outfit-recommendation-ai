@@ -1,14 +1,57 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#11998e"/>
-      <stop offset="1" stop-color="#38ef7d"/>
+    <linearGradient id="jacketGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e3a5f"/>
+      <stop offset="50%" stop-color="#2c5f8d"/>
+      <stop offset="100%" stop-color="#1e3a5f"/>
     </linearGradient>
+    <filter id="jacketShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="5"/>
+      <feOffset dx="0" dy="3" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.35"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <!-- outerwear overlay (coat/jacket) -->
-  <path d="M255 315 C330 250, 570 250, 645 315 C710 370, 745 520, 730 670 C720 770, 665 830, 585 860 C535 880, 485 890, 450 890 C415 890, 365 880, 315 860 C235 830, 180 770, 170 670 C155 520, 190 370, 255 315 Z" fill="url(#g)" opacity="0.78"/>
-  <path d="M450 300 L450 880" stroke="rgba(0,0,0,0.18)" stroke-width="10"/>
-  <circle cx="450" cy="460" r="10" fill="rgba(255,255,255,0.40)"/>
-  <circle cx="450" cy="540" r="10" fill="rgba(255,255,255,0.40)"/>
-  <circle cx="450" cy="620" r="10" fill="rgba(255,255,255,0.40)"/>
+  
+  <!-- Jacket body -->
+  <path d="M 240 290 Q 250 275 270 265 L 320 250 Q 380 240 450 240 Q 520 240 580 250 L 630 265 Q 650 275 660 290 L 720 350 Q 735 370 745 395 L 760 450 Q 768 490 770 530 L 772 620 Q 772 680 765 720 L 755 770 Q 748 795 735 815 L 710 850 Q 690 870 665 882 L 620 905 Q 580 920 530 928 L 470 935 Q 430 935 390 928 L 340 920 Q 300 905 270 882 L 235 850 Q 210 830 195 805 L 175 760 Q 165 720 162 680 L 160 620 Q 160 570 165 520 L 175 460 Q 185 410 205 370 Z" 
+        fill="url(#jacketGrad)" 
+        filter="url(#jacketShadow)"
+        opacity="0.94"/>
+  
+  <!-- Collar -->
+  <path d="M 350 260 Q 380 250 450 250 Q 520 250 550 260 L 560 275 Q 565 285 560 295 L 540 310 Q 520 318 490 320 L 450 322 Q 410 320 380 318 L 360 310 Q 340 295 345 285 L 350 275 Z" 
+        fill="#1a2f4a" 
+        opacity="0.95"/>
+  
+  <!-- Left lapel -->
+  <path d="M 270 290 Q 280 310 295 340 L 315 390 Q 325 430 330 470 L 335 530 Q 337 580 335 630 L 330 690 Q 325 730 315 765 L 300 800 Q 290 820 278 835 L 260 855 Q 250 865 240 870 L 230 875 Q 225 875 222 870 L 218 860 Q 217 845 220 830 L 230 790 Q 240 750 248 710 L 258 650 Q 265 590 268 530 L 270 470 Q 270 410 268 360 L 265 320 Q 263 300 265 285 Z" 
+        fill="url(#jacketGrad)" 
+        opacity="0.88"/>
+  
+  <!-- Right lapel -->
+  <path d="M 630 290 Q 620 310 605 340 L 585 390 Q 575 430 570 470 L 565 530 Q 563 580 565 630 L 570 690 Q 575 730 585 765 L 600 800 Q 610 820 622 835 L 640 855 Q 650 865 660 870 L 670 875 Q 675 875 678 870 L 682 860 Q 683 845 680 830 L 670 790 Q 660 750 652 710 L 642 650 Q 635 590 632 530 L 630 470 Q 630 410 632 360 L 635 320 Q 637 300 635 285 Z" 
+        fill="url(#jacketGrad)" 
+        opacity="0.88"/>
+  
+  <!-- Center zipper -->
+  <line x1="450" y1="280" x2="450" y2="900" stroke="rgba(0,0,0,0.25)" stroke-width="6"/>
+  <line x1="450" y1="280" x2="450" y2="900" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+  
+  <!-- Zipper pulls -->
+  <circle cx="450" cy="400" r="6" fill="rgba(200,200,200,0.7)"/>
+  <circle cx="450" cy="520" r="6" fill="rgba(200,200,200,0.7)"/>
+  <circle cx="450" cy="640" r="6" fill="rgba(200,200,200,0.7)"/>
+  <circle cx="450" cy="760" r="6" fill="rgba(200,200,200,0.7)"/>
+  
+  <!-- Pockets -->
+  <path d="M 310 650 Q 315 655 320 660 L 340 675 Q 345 680 345 688 L 343 705 Q 340 712 333 715 L 315 720 Q 308 720 303 715 L 295 705 Q 292 695 295 685 L 302 670 Q 305 660 310 655 Z" 
+        fill="rgba(0,0,0,0.2)"/>
+  <path d="M 590 650 Q 585 655 580 660 L 560 675 Q 555 680 555 688 L 557 705 Q 560 712 567 715 L 585 720 Q 592 720 597 715 L 605 705 Q 608 695 605 685 L 598 670 Q 595 660 590 655 Z" 
+        fill="rgba(0,0,0,0.2)"/>
 </svg>

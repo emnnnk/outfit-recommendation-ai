@@ -185,10 +185,37 @@ def get_weather(city):
 @app.route('/api/model-metrics')
 def get_model_metrics():
     try:
+        # Load traditional ML metrics
         metrics = load_metrics()
         if metrics is None:
             return jsonify({"success": False, "error": "metrics.json bulunamadı"}), 404
-        return jsonify({"success": True, "metrics": metrics})
+        
+        # Try to load deep learning metrics
+        deep_metrics_file = os.path.join(MODELS_DIR, 'metrics_deep.json')
+        deep_metrics = None
+        if os.path.exists(deep_metrics_file):
+            try:
+                with open(deep_metrics_file, 'r', encoding='utf-8') as f:
+                    deep_metrics = json.load(f)
+            except Exception:
+                pass
+        
+        # Merge metrics
+        merged_models = dict(metrics.get('models', {}))
+        if deep_metrics and 'models' in deep_metrics:
+            for key, value in deep_metrics['models'].items():
+                merged_models[key] = value
+        
+        result = {
+            "success": True,
+            "metrics": {
+                **metrics,
+                "models": merged_models,
+                "has_deep_models": deep_metrics is not None
+            }
+        }
+        
+        return jsonify(result)
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 

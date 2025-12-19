@@ -1,11 +1,54 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#11192f"/>
-      <stop offset="1" stop-color="#4facfe"/>
+    <linearGradient id="shoeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="50%" stop-color="#16213e"/>
+      <stop offset="100%" stop-color="#0f0f1e"/>
     </linearGradient>
+    <filter id="shoeShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="0" dy="3" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.4"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <!-- shoes overlay -->
-  <path d="M250 1130 C310 1100, 370 1105, 410 1128 C450 1152, 452 1180, 430 1195 C390 1222, 300 1218, 240 1188 C210 1172, 210 1148, 250 1130 Z" fill="url(#g)" opacity="0.95"/>
-  <path d="M490 1128 C530 1105, 590 1100, 650 1130 C690 1148, 690 1172, 660 1188 C600 1218, 510 1222, 470 1195 C448 1180, 450 1152, 490 1128 Z" fill="url(#g)" opacity="0.95"/>
+  
+  <!-- Left shoe -->
+  <g filter="url(#shoeShadow)">
+    <!-- Sole -->
+    <ellipse cx="360" cy="1185" rx="75" ry="12" fill="#0a0a0a" opacity="0.9"/>
+    <!-- Upper -->
+    <path d="M 285 1150 Q 290 1140 300 1135 L 330 1125 Q 360 1120 390 1125 L 420 1135 Q 430 1140 435 1150 L 440 1165 Q 442 1175 438 1182 L 430 1190 Q 420 1195 405 1197 L 365 1200 Q 340 1200 315 1197 L 290 1190 Q 280 1185 275 1175 L 270 1165 Q 268 1155 270 1150 Z" 
+          fill="url(#shoeGrad)" 
+          opacity="0.96"/>
+    <!-- Toe cap -->
+    <path d="M 300 1135 Q 330 1128 360 1128 Q 390 1128 420 1135 L 415 1145 Q 390 1140 360 1140 Q 330 1140 305 1145 Z" 
+          fill="rgba(255,255,255,0.08)"/>
+    <!-- Laces hint -->
+    <line x1="340" y1="1145" x2="345" y2="1155" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+    <line x1="360" y1="1143" x2="365" y2="1153" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+    <line x1="380" y1="1145" x2="385" y2="1155" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+  </g>
+  
+  <!-- Right shoe -->
+  <g filter="url(#shoeShadow)">
+    <!-- Sole -->
+    <ellipse cx="540" cy="1185" rx="75" ry="12" fill="#0a0a0a" opacity="0.9"/>
+    <!-- Upper -->
+    <path d="M 465 1150 Q 470 1140 480 1135 L 510 1125 Q 540 1120 570 1125 L 600 1135 Q 610 1140 615 1150 L 620 1165 Q 622 1175 618 1182 L 610 1190 Q 600 1195 585 1197 L 545 1200 Q 520 1200 495 1197 L 470 1190 Q 460 1185 455 1175 L 450 1165 Q 448 1155 450 1150 Z" 
+          fill="url(#shoeGrad)" 
+          opacity="0.96"/>
+    <!-- Toe cap -->
+    <path d="M 480 1135 Q 510 1128 540 1128 Q 570 1128 600 1135 L 595 1145 Q 570 1140 540 1140 Q 510 1140 485 1145 Z" 
+          fill="rgba(255,255,255,0.08)"/>
+    <!-- Laces hint -->
+    <line x1="520" y1="1145" x2="525" y2="1155" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+    <line x1="540" y1="1143" x2="545" y2="1153" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+    <line x1="560" y1="1145" x2="565" y2="1155" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+  </g>
 </svg>

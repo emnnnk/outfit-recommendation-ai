@@ -75,6 +75,9 @@ class OutfitApp {
         this.fetchModelMetrics();
 
         this.applyInitialSidebarState();
+
+        // Init Avatar Creator
+        this.initAvatarCreator();
     }
 
     getCurrentThemeKey() {
@@ -605,6 +608,7 @@ class OutfitApp {
                                     <div class="piece-mini-meta">
                                         <span class="piece-mini-cat">${category}</span>
                                     </div>
+                                    ${p.shop_link ? `<a href="${p.shop_link}" target="_blank" rel="noopener" class="btn-shop">Boyner'de Gör</a>` : ''}
                                 </div>
                             </div>
                         `;
@@ -812,10 +816,10 @@ class OutfitApp {
         if (!Array.isArray(pieces) || pieces.length === 0) {
             return 'Complete outfit';
         }
-        
+
         const labels = pieces.slice(0, 3).map(p => p.label || p.category).filter(Boolean);
         if (labels.length === 0) return 'Stylish combination';
-        
+
         return labels.join(' + ');
     }
 
@@ -1005,7 +1009,7 @@ class OutfitApp {
                 const acc = (typeof v.accuracy === 'number') ? `${(v.accuracy * 100).toFixed(1)}%` : '--';
                 const f1 = (typeof v.macro_f1 === 'number') ? `${(v.macro_f1 * 100).toFixed(1)}%` : '--';
                 const isBest = best && (best === key);
-                
+
                 // Determine model type badge
                 let typeBadge = '';
                 if (group === 'rule' || key === 'rules') {
@@ -1015,7 +1019,7 @@ class OutfitApp {
                 } else if (group === 'deep' || ['ann', 'cnn1d', 'lstm'].includes(key)) {
                     typeBadge = '<span class="model-type-badge badge-deep">Deep Learning</span>';
                 }
-                
+
                 // Experimental badge for CNN1D and LSTM
                 const isExperimental = ['cnn1d', 'lstm'].includes(key);
                 const expBadge = isExperimental ? '<span class="model-type-badge badge-experimental">Experimental</span>' : '';
@@ -1093,6 +1097,76 @@ class OutfitApp {
         this.outfitsError.classList.remove('hidden');
         if (this.outfitsGrid) this.outfitsGrid.classList.add('hidden');
         if (this.outfitsPlaceholder) this.outfitsPlaceholder.classList.remove('hidden');
+    }
+
+    /* =========================================
+       READY PLAYER ME INTEGRATION
+       ========================================= */
+    initAvatarCreator() {
+        const modal = document.getElementById('rpm-modal');
+        const iframe = document.getElementById('rpm-iframe');
+        const closeBtn = document.getElementById('rpm-close');
+        const customBtn = document.getElementById('avatar-custom-btn');
+        const stage = document.getElementById('avatar-stage');
+
+        if (!modal || !iframe || !customBtn) return;
+
+        // Load saved avatar on startup
+        const savedAvatar = localStorage.getItem('user_avatar_url');
+        if (savedAvatar && stage) {
+            console.log('[App] Loading saved avatar:', savedAvatar);
+            stage.setAttribute('data-model-url', savedAvatar);
+        }
+
+        const openModal = () => {
+            modal.classList.add('active');
+            // Use 'frameApi' to enable postMessage communication
+            iframe.src = 'https://demo.readyplayer.me/avatar?frameApi';
+        };
+
+        const closeModal = () => {
+            modal.classList.remove('active');
+            iframe.src = ''; // Clear src to stop it running
+        };
+
+        customBtn.addEventListener('click', openModal);
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeModal);
+        }
+
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // Listen for RPM events
+        window.addEventListener('message', (event) => {
+            // Verify origin for security
+            if (!event.origin.includes('readyplayer.me')) return;
+
+            const url = event.data;
+
+            try {
+                if (typeof url === 'string' && url.startsWith('http')) {
+                    // This is likely the avatar URL
+                    console.log('[RPM] Avatar URL received:', url);
+
+                    // Save and use
+                    localStorage.setItem('user_avatar_url', url);
+
+                    if (stage) {
+                        stage.setAttribute('data-model-url', url);
+                        this.showToast('Avatar güncellendi! Sayfa yenileniyor...', 'success');
+                        setTimeout(() => window.location.reload(), 1500);
+                    }
+
+                    closeModal();
+                }
+            } catch (e) {
+                console.error('[RPM] Error processing message:', e);
+            }
+        });
     }
 
     // Create ripple effect on buttons

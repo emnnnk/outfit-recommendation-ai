@@ -205,3 +205,16 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# ===== Project specific ignores =====
+
+# Trained ML models (do not deploy)
+outfit-ai/models/*.pt
+
+# Training scripts (local only)
+outfit-ai/train_deep_models.py
+
+# Generated runtime assets
+web-app/static/images/generated/
+web-app/static/models/
+

@@ -1,11 +1,50 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#302b63"/>
-      <stop offset="1" stop-color="#667eea"/>
+    <linearGradient id="pantsGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2c3e50"/>
+      <stop offset="50%" stop-color="#34495e"/>
+      <stop offset="100%" stop-color="#2c3e50"/>
     </linearGradient>
+    <filter id="pantsShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.25"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <!-- pants / bottom overlay -->
-  <path d="M320 720 C360 700, 540 700, 580 720 C640 750, 650 820, 630 920 C610 1020, 580 1120, 545 1160 C520 1186, 472 1186, 452 1145 C440 1120, 445 1015, 450 920 C455 1015, 460 1120, 448 1145 C428 1186, 380 1186, 355 1160 C320 1120, 290 1020, 270 920 C250 820, 260 750, 320 720 Z" fill="url(#g)" opacity="0.92"/>
-  <path d="M450 740 L450 1150" stroke="rgba(255,255,255,0.22)" stroke-width="10" stroke-linecap="round"/>
+  
+  <!-- Waistband -->
+  <path d="M 300 720 Q 310 710 330 708 L 420 705 Q 450 704 480 705 L 570 708 Q 590 710 600 720 L 610 735 Q 612 745 610 755 L 600 770 Q 595 775 585 778 L 520 785 Q 480 787 450 787 Q 420 787 380 785 L 315 778 Q 305 775 300 770 L 290 755 Q 288 745 290 735 Z" 
+        fill="#1a252f" 
+        opacity="0.95"/>
+  
+  <!-- Left leg -->
+  <path d="M 300 755 Q 295 765 292 780 L 285 820 Q 280 870 278 920 L 275 1000 Q 273 1060 275 1100 L 280 1140 Q 282 1155 288 1165 L 300 1180 Q 310 1188 325 1190 L 355 1192 Q 375 1192 390 1188 L 410 1180 Q 420 1172 425 1160 L 432 1130 Q 435 1100 437 1070 L 442 1000 Q 445 930 448 870 L 450 820 Q 451 780 450 755 Z" 
+        fill="url(#pantsGrad)" 
+        filter="url(#pantsShadow)"
+        opacity="0.94"/>
+  
+  <!-- Right leg -->
+  <path d="M 600 755 Q 605 765 608 780 L 615 820 Q 620 870 622 920 L 625 1000 Q 627 1060 625 1100 L 620 1140 Q 618 1155 612 1165 L 600 1180 Q 590 1188 575 1190 L 545 1192 Q 525 1192 510 1188 L 490 1180 Q 480 1172 475 1160 L 468 1130 Q 465 1100 463 1070 L 458 1000 Q 455 930 452 870 L 450 820 Q 449 780 450 755 Z" 
+        fill="url(#pantsGrad)" 
+        filter="url(#pantsShadow)"
+        opacity="0.94"/>
+  
+  <!-- Center seam -->
+  <line x1="450" y1="755" x2="450" y2="1180" stroke="rgba(0,0,0,0.2)" stroke-width="3"/>
+  
+  <!-- Pocket details -->
+  <path d="M 320 800 Q 325 805 330 810 L 340 820 Q 342 825 340 830 L 335 840 Q 330 843 325 840 L 315 830 Q 312 825 315 820 Z" 
+        fill="rgba(0,0,0,0.15)"/>
+  <path d="M 580 800 Q 575 805 570 810 L 560 820 Q 558 825 560 830 L 565 840 Q 570 843 575 840 L 585 830 Q 588 825 585 820 Z" 
+        fill="rgba(0,0,0,0.15)"/>
+  
+  <!-- Fabric highlights -->
+  <path d="M 310 850 Q 320 852 330 850" stroke="rgba(255,255,255,0.06)" stroke-width="2" fill="none"/>
+  <path d="M 570 850 Q 580 852 590 850" stroke="rgba(255,255,255,0.06)" stroke-width="2" fill="none"/>
 </svg>

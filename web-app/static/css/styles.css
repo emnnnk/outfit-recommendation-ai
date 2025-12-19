@@ -1432,6 +1432,68 @@ body.sidebar-open .sidebar {
     z-index: 1;
 }
 
+.avatar-3d-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 7;
+    opacity: 0;
+    transition: opacity 300ms ease;
+    pointer-events: none;
+    touch-action: none;
+}
+
+.avatar-stage.is-3d-ready .avatar-3d-canvas {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.avatar-3d-canvas canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+}
+
+.avatar-3d-status {
+    position: absolute;
+    inset: 0;
+    z-index: 8;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    text-align: center;
+    color: var(--text-secondary);
+    background: rgba(10, 10, 20, 0.75);
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    transition: opacity 300ms ease;
+}
+
+.avatar-3d-status p {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    white-space: pre-line;
+    line-height: 1.6;
+    max-width: 90%;
+}
+
+.avatar-3d-status[data-kind="error"] {
+    background: rgba(139, 0, 0, 0.25);
+    border-color: rgba(248, 113, 113, 0.3);
+}
+
+.avatar-3d-status[data-kind="error"] p {
+    color: rgba(248, 113, 113, 0.95);
+    font-weight: 500;
+}
+
+.avatar-stage.is-3d-ready .avatar-layer {
+    opacity: 0;
+}
+
 .avatar-stage::after {
     content: '';
     position: absolute;
@@ -2352,4 +2414,124 @@ body.weather-stormy {
 
 .select-input:focus {
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* 3D Avatar Customization Modal */
+.rpm-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.rpm-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.rpm-container {
+    width: 90%;
+    height: 90%;
+    max-width: 1200px;
+    background: #111;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.rpm-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+.rpm-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s;
+}
+
+.rpm-close:hover {
+    background: rgba(255, 50, 50, 0.8);
+}
+
+/* Avatar Custom Button */
+.btn-avatar-custom {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.btn-avatar-custom:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Boyner Shop Button */
+.btn-shop {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: #f47920; /* Boyner orange approximate */
+    color: white;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 8px;
+    transition: all 0.2s;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-shop:hover {
+    background: #ff8c3a; /* Lighter orange */
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(244, 121, 32, 0.3);
+}
+
+.btn-shop:disabled, .btn-shop.disabled {
+    background: #555;
+    cursor: not-allowed;
+    opacity: 0.7;
 }
