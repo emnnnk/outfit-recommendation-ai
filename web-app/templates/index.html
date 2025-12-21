@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 
-<body class="sidebar-open">
+<body>
     <!-- City Background Image -->
     <div id="city-background" class="city-bg"></div>
     <div class="city-overlay"></div>
@@ -41,10 +41,7 @@
     <!-- Main Container -->
     <div class="container">
         <header class="topbar" id="topbar">
-            <button class="icon-btn" id="sidebar-toggle" aria-label="Menü">
-                <span class="hamburger" aria-hidden="true"></span>
-            </button>
-
+            <!-- Brand -->
             <div class="topbar-brand" aria-label="Outfit AI">
                 <span class="topbar-logo">🧥</span>
                 <span class="topbar-title">Outfit AI</span>
@@ -55,8 +52,6 @@
                 Generate
             </button>
         </header>
-
-        <div class="drawer-backdrop" id="drawer-backdrop" aria-hidden="true"></div>
 
         <!-- Header -->
         <header class="header legacy-header">
@@ -277,12 +272,14 @@
 
                                 <div class="setting-item">
                                     <label for="height-cm">Boy (cm) (opsiyonel)</label>
-                                    <input id="height-cm" type="number" inputmode="numeric" min="80" max="230" placeholder="Örn: 175" class="text-input" />
+                                    <input id="height-cm" type="number" inputmode="numeric" min="80" max="230"
+                                        placeholder="Örn: 175" class="text-input" />
                                 </div>
 
                                 <div class="setting-item">
                                     <label for="weight-kg">Kilo (kg) (opsiyonel)</label>
-                                    <input id="weight-kg" type="number" inputmode="numeric" min="25" max="250" placeholder="Örn: 72" class="text-input" />
+                                    <input id="weight-kg" type="number" inputmode="numeric" min="25" max="250"
+                                        placeholder="Örn: 72" class="text-input" />
                                 </div>
 
                                 <div class="setting-item">
@@ -401,38 +398,47 @@
                     </div>
                 </div>
 
-                <div class="glass-card avatar-card" id="avatar-card">
-                    <div class="card-header">
-                        <span class="card-icon">🧍</span>
-                        <h2>Avatar Preview</h2>
+                <!-- STRICT AVATAR PREVIEW PANEL -->
+                <section id="avatar-preview" class="panel avatar-panel glass-card">
+                    <div class="panel-header avatar-preview-header">
+                        <h3 class="avatar-title">🧍 Avatar Preview</h3>
+                        <button id="avatar-custom-btn" class="btn btn-secondary"
+                            style="padding: 4px 12px; font-size: 0.8rem;">
+                            ✏️ Customize
+                        </button>
                     </div>
 
-                    <div class="avatar-wrap">
-                        <div id="avatar-stage" class="avatar-stage" aria-label="Avatar Preview" data-model-url="/static/models/avatar.glb">
-                            <div id="avatar-3d-canvas" class="avatar-3d-canvas" aria-hidden="true"></div>
-                            <div id="avatar-3d-status" class="avatar-3d-status hidden">
-                                <div class="spinner"></div>
-                                <p>3D avatar yükleniyor...</p>
-                            </div>
-                            <img id="avatar-shadow" src="/static/images/avatar/shadow.svg" alt="" class="avatar-layer avatar-shadow" />
-                            <img id="avatar-body" src="/static/images/avatar/body.svg" alt="" class="avatar-layer avatar-body" />
-                            <img id="avatar-bottom" src="/static/images/avatar/bottom.svg" alt="" class="avatar-layer avatar-bottom" />
-                            <img id="avatar-top" src="/static/images/avatar/top.svg" alt="" class="avatar-layer avatar-top" />
+                    <div id="avatar-stage" class="avatar-stage" data-model-url="/static/models/avatar.glb">
+                        <!-- STATUS OVERLAY -->
+                        <div id="avatar-3d-status" class="avatar-3d-status hidden">
+                            <div class="spinner"></div>
+                            <p>Avatar yükleniyor...</p>
+                        </div>
 
-                            <img id="avatar-outerwear" src="/static/images/avatar/outerwear.svg" alt="" class="avatar-layer avatar-outerwear hidden" />
-                            <img id="avatar-shoes" src="/static/images/avatar/shoes.svg" alt="" class="avatar-layer avatar-shoes" />
-                            <img id="avatar-accessory" src="/static/images/avatar/accessory.svg" alt="" class="avatar-layer avatar-accessory hidden" />
-                            <img id="avatar-highlight" src="/static/images/avatar/highlight.svg" alt="" class="avatar-layer avatar-highlight" />
-                            
-                            <!-- Customize Avatar Button -->
-                            <button id="avatar-custom-btn" class="btn-avatar-custom" title="Kendi avatarını oluştur">
-                                <span>✏️</span>
-                                <span>Customize</span>
-                            </button>
+                        <!-- 3D CANVAS INJECTION POINT -->
+                        <div id="avatar-3d-canvas"></div>
+
+                        <!-- SVG FALLBACK LAYERS -->
+                        <div id="avatar-fallback" class="avatar-fallback">
+                            <img id="avatar-shadow" src="/static/images/avatar/shadow.svg" alt=""
+                                class="avatar-layer avatar-shadow" />
+                            <img id="avatar-body" src="/static/images/avatar/body.svg" alt=""
+                                class="avatar-layer avatar-body" />
+                            <img id="avatar-bottom" src="/static/images/avatar/bottom.svg" alt=""
+                                class="avatar-layer avatar-bottom" />
+                            <img id="avatar-top" src="/static/images/avatar/top.svg" alt=""
+                                class="avatar-layer avatar-top" />
+                            <img id="avatar-outerwear" src="/static/images/avatar/outerwear.svg" alt=""
+                                class="avatar-layer avatar-outerwear hidden" />
+                            <img id="avatar-shoes" src="/static/images/avatar/shoes.svg" alt=""
+                                class="avatar-layer avatar-shoes" />
+                            <img id="avatar-accessory" src="/static/images/avatar/accessory.svg" alt=""
+                                class="avatar-layer avatar-accessory hidden" />
+                            <img id="avatar-highlight" src="/static/images/avatar/highlight.svg" alt=""
+                                class="avatar-layer avatar-highlight" />
                         </div>
                     </div>
-                </div>
-
+                </section>
                 <div class="glass-card outfits-card" id="outfits-card">
                     <div class="card-header">
                         <span class="card-icon">🧩</span>
@@ -471,7 +477,8 @@
     <div id="rpm-modal" class="rpm-modal" aria-hidden="true">
         <div class="rpm-container">
             <button id="rpm-close" class="rpm-close" aria-label="Close">&times;</button>
-            <iframe id="rpm-iframe" class="rpm-iframe" allow="camera *; microphone *; clipboard-write" title="Avatar Creator"></iframe>
+            <iframe id="rpm-iframe" class="rpm-iframe" allow="camera *; microphone *; clipboard-write"
+                title="Avatar Creator"></iframe>
         </div>
     </div>
 

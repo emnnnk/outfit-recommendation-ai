@@ -608,7 +608,15 @@ class OutfitApp {
                                     <div class="piece-mini-meta">
                                         <span class="piece-mini-cat">${category}</span>
                                     </div>
-                                    ${p.shop_link ? `<a href="${p.shop_link}" target="_blank" rel="noopener" class="btn-shop">Boyner'de Gör</a>` : ''}
+                                    ${p.shop_link ? `
+                                    <a href="${p.shop_link}" class="shop-icon" target="_blank" rel="noopener" title="Boyner’de Aç" aria-label="Boyner’de Aç">
+                                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M6 6h15l-1.5 9h-12z"></path>
+                                            <path d="M6 6l-2 0"></path>
+                                            <circle cx="9" cy="20" r="1"></circle>
+                                            <circle cx="18" cy="20" r="1"></circle>
+                                        </svg>
+                                    </a>` : ''}
                                 </div>
                             </div>
                         `;
@@ -675,16 +683,26 @@ class OutfitApp {
 
     updateAvatarFromOutfit(outfit) {
         if (!outfit) {
-            if (this.avatarPieces) {
-                this.avatarPieces.innerHTML = '<div class="avatar-pieces-placeholder">Bir kombin seçildiğinde parçalar burada görünecek.</div>';
-            }
+            // No outfit logic if needed
             return;
         }
 
         const layers = outfit.avatar_layers || {};
+
+        // Helper: Only accept URLs that are strictly for avatar layers (static assets)
+        // AND expressly Reject anything that looks like a generated product card
+        const isValidLayer = (url) => {
+            if (!url) return false;
+            if (typeof url !== 'string') return false;
+            // Reject generated product cards which have 'generated' in path usually or 'boyner-assets'
+            // We only want transparent PNGs/SVGs specifically designed for the mannequin.
+            // Our valid assets are in /static/images/avatar/
+            return url.includes('/static/images/avatar/') && !url.includes('generated');
+        };
+
         const safeLayer = (key, fallback) => {
             const v = layers && typeof layers[key] === 'string' ? layers[key].trim() : '';
-            return v || fallback;
+            return isValidLayer(v) ? v : fallback;
         };
 
         if (this.avatarBody) this.avatarBody.src = safeLayer('body', this.avatarAsset('body'));
@@ -694,17 +712,23 @@ class OutfitApp {
 
         const outer = layers && typeof layers.outerwear === 'string' ? layers.outerwear.trim() : '';
         if (this.avatarOuterwear) {
-            this.avatarOuterwear.src = outer || this.avatarAsset('outerwear');
-            this.avatarOuterwear.classList.toggle('hidden', !outer);
+            // Apply stricter check for outerwear as well
+            const valid = isValidLayer(outer);
+            this.avatarOuterwear.src = valid ? outer : this.avatarAsset('outerwear');
+            this.avatarOuterwear.classList.toggle('hidden', !valid);
         }
 
         const acc = layers && typeof layers.accessory === 'string' ? layers.accessory.trim() : '';
         if (this.avatarAccessory) {
-            this.avatarAccessory.src = acc || this.avatarAsset('accessory');
-            this.avatarAccessory.classList.toggle('hidden', !acc);
+            const valid = isValidLayer(acc);
+            this.avatarAccessory.src = valid ? acc : this.avatarAsset('accessory');
+            // If invalid, we hide it. We NEVER show the text-based generated card here.
+            this.avatarAccessory.classList.toggle('hidden', !valid);
         }
 
-        this.renderAvatarPieces(outfit.pieces);
+        // Remove renderAvatarPieces call from here as it likely renders into the wrong place 
+        // or we don't have that container anymore in the new design.
+        // this.renderAvatarPieces(outfit.pieces);
     }
 
     renderAvatarPieces(pieces) {
@@ -1112,9 +1136,8 @@ class OutfitApp {
         if (!modal || !iframe || !customBtn) return;
 
         // Load saved avatar on startup
-        const savedAvatar = localStorage.getItem('user_avatar_url');
+        const savedAvatar = localStorage.getItem('rpm_glb_url');
         if (savedAvatar && stage) {
-            console.log('[App] Loading saved avatar:', savedAvatar);
             stage.setAttribute('data-model-url', savedAvatar);
         }
 
@@ -1149,19 +1172,26 @@ class OutfitApp {
 
             try {
                 if (typeof url === 'string' && url.startsWith('http')) {
-                    // This is likely the avatar URL
                     console.log('[RPM] Avatar URL received:', url);
 
-                    // Save and use
-                    localStorage.setItem('user_avatar_url', url);
+                    if (url.startsWith('https://models.readyplayer.me/')) {
+                        // 1. UPDATE DOM
+                        if (stage) {
+                            stage.setAttribute('data-model-url', url);
+                        }
 
-                    if (stage) {
-                        stage.setAttribute('data-model-url', url);
-                        this.showToast('Avatar güncellendi! Sayfa yenileniyor...', 'success');
-                        setTimeout(() => window.location.reload(), 1500);
+                        // 2. PERSIST
+                        localStorage.setItem('rpm_glb_url', url);
+
+                        // 3. DISPATCH EVENT for 3D Viewer
+                        window.dispatchEvent(new Event('avatar:modelChanged'));
+
+                        // 4. FEEDBACK
+                        this.showToast('Avatar güncellendi! Yükleniyor...', 'success');
+                        closeModal();
+                    } else {
+                        console.warn('[RPM] Invalid GLB URL:', url);
                     }
-
-                    closeModal();
                 }
             } catch (e) {
                 console.error('[RPM] Error processing message:', e);
@@ -1223,3 +1253,52 @@ document.addEventListener('DOMContentLoaded', () => {
         app.fetchWeather();
     }, 1000);
 });
+// ===== Premium UI Controls Patch (Front/Back + Sidebar Overlay) =====
+(function () {
+    try {
+        // Sidebar overlay toggle (hamburger)
+        const menuBtn = document.querySelector("#menu-toggle, .menu-toggle, .hamburger, [data-menu-toggle]");
+        const overlay = document.querySelector("#sidebar-overlay, .sidebar-overlay, .overlay");
+        const sidebar = document.querySelector("#sidebar, .sidebar");
+
+        const openMenu = () => {
+            if (overlay) overlay.classList.add("is-open");
+            if (sidebar) sidebar.classList.add("is-open");
+            document.body.classList.add("menu-open");
+        };
+
+        const closeMenu = () => {
+            if (overlay) overlay.classList.remove("is-open");
+            if (sidebar) sidebar.classList.remove("is-open");
+            document.body.classList.remove("menu-open");
+        };
+
+        if (menuBtn) menuBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (document.body.classList.contains("menu-open")) closeMenu();
+            else openMenu();
+        });
+
+        if (overlay) overlay.addEventListener("click", closeMenu);
+
+        // Avatar Front/Back buttons
+        const btnFront = document.querySelector("#btn-avatar-front, [data-avatar-front]");
+        const btnBack = document.querySelector("#btn-avatar-back,  [data-avatar-back]");
+
+        const emit = (name) => window.dispatchEvent(new CustomEvent(name));
+
+        if (btnFront) btnFront.addEventListener("click", (e) => {
+            e.preventDefault();
+            emit("avatar:front");
+        });
+
+        if (btnBack) btnBack.addEventListener("click", (e) => {
+            e.preventDefault();
+            emit("avatar:back");
+        });
+
+        console.log("[UI] Premium controls patch loaded");
+    } catch (err) {
+        console.error("[UI] Premium controls patch failed:", err);
+    }
+})();

@@ -1,341 +1,241 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/DRACOLoader.js';
-import { FBXLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/FBXLoader.js';
-import { RoomEnvironment } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/environments/RoomEnvironment.js';
 
-const isWebGLAvailable = () => {
-    try {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        return Boolean(gl && window.WebGLRenderingContext);
-    } catch {
-        return false;
-    }
-};
+import * as THREE from 'https://cdn.skypack.dev/three@0.150.1';
+import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.150.1/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'https://cdn.skypack.dev/three@0.150.1/examples/jsm/loaders/DRACOLoader.js';
+import { OrbitControls } from 'https://cdn.skypack.dev/three@0.150.1/examples/jsm/controls/OrbitControls.js';
 
-const getFileExt = (url) => {
-    const clean = String(url || '').split('?')[0].split('#')[0];
-    const idx = clean.lastIndexOf('.');
-    return idx === -1 ? '' : clean.slice(idx + 1).toLowerCase();
-};
-
-const setStatus = (statusEl, message, kind) => {
-    if (!statusEl) return;
-
-    statusEl.classList.remove('hidden');
-    statusEl.dataset.kind = kind || '';
-
-    const p = statusEl.querySelector('p');
-    if (p) p.textContent = message;
-
-    const spinner = statusEl.querySelector('.spinner');
-    if (spinner) spinner.style.display = kind === 'loading' ? '' : 'none';
-};
-
-const prepareModel = (root) => {
-    root.traverse((obj) => {
-        if (!obj || !obj.isMesh) return;
-        obj.castShadow = true;
-        obj.receiveShadow = false;
-        if (obj.material && obj.material.isMaterial) {
-            obj.material.side = THREE.FrontSide;
-        }
-    });
-};
-
-const centerAndGroundModel = (root) => {
-    const box = new THREE.Box3().setFromObject(root);
-    const center = new THREE.Vector3();
-    box.getCenter(center);
-    root.position.sub(center);
-
-    const box2 = new THREE.Box3().setFromObject(root);
-    root.position.y -= box2.min.y;
-
-    const box3 = new THREE.Box3().setFromObject(root);
-    const size = new THREE.Vector3();
-    box3.getSize(size);
-
-    return { box: box3, size };
-};
-
-const fitCameraToBox = (camera, controls, box, fitOffset = 1.25) => {
-    const size = new THREE.Vector3();
-    box.getSize(size);
-
-    const center = new THREE.Vector3();
-    box.getCenter(center);
-
-    const maxDim = Math.max(size.x, size.y, size.z);
-    const fov = (camera.fov * Math.PI) / 180;
-    let cameraZ = Math.abs((maxDim / 2) / Math.tan(fov / 2));
-    cameraZ *= fitOffset;
-
-    camera.position.set(center.x, center.y + size.y * 0.15, center.z + cameraZ);
-    camera.near = Math.max(0.01, cameraZ / 100);
-    camera.far = Math.max(50, cameraZ * 10);
-    camera.updateProjectionMatrix();
-
-    if (controls) {
-        controls.target.set(center.x, center.y + size.y * 0.15, center.z);
-        controls.minDistance = cameraZ * 0.55;
-        controls.maxDistance = cameraZ * 2.25;
-        controls.update();
-    }
-};
-
-const loadModel = async (url) => {
-    const ext = getFileExt(url);
-    console.log('[3D Avatar] Loading model with extension:', ext);
-
-    // First, fetch to check file size and status
-    try {
-        console.log('[3D Avatar] Fetching model file:', url);
-        // Direct load without HEAD check to support dynamic URLs like Ready Player Me
-        // especially since they might have redirects or missing content-length
-    } catch (fetchError) {
-        console.error('[3D Avatar] ❌ Fetch setup failed:', fetchError);
-    }
-
-    if (ext === 'glb' || ext === 'gltf') {
-        console.log('[3D Avatar] Using GLTFLoader...');
-        const loader = new GLTFLoader();
-        const draco = new DRACOLoader();
-        draco.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
-        loader.setDRACOLoader(draco);
-
-        const gltf = await new Promise((resolve, reject) => {
-            loader.load(
-                url,
-                (result) => {
-                    console.log('[3D Avatar] ✅ GLTFLoader SUCCESS:', result);
-                    resolve(result);
-                },
-                (progress) => {
-                    if (progress.lengthComputable) {
-                        const percent = Math.round((progress.loaded / progress.total) * 100);
-                        console.log('[3D Avatar] Loading progress:', percent + '%');
-                    }
-                },
-                (error) => {
-                    console.error('[3D Avatar] ❌ GLTFLoader ERROR:', error);
-                    reject(error);
-                }
-            );
-        });
-
-        return { root: gltf.scene, animations: gltf.animations || [] };
-    }
-
-    if (ext === 'fbx') {
-        console.log('[3D Avatar] Using FBXLoader...');
-        const loader = new FBXLoader();
-        const obj = await new Promise((resolve, reject) => {
-            loader.load(
-                url,
-                (result) => {
-                    console.log('[3D Avatar] ✅ FBXLoader SUCCESS:', result);
-                    resolve(result);
-                },
-                (progress) => {
-                    if (progress.lengthComputable) {
-                        const percent = Math.round((progress.loaded / progress.total) * 100);
-                        console.log('[3D Avatar] Loading progress:', percent + '%');
-                    }
-                },
-                (error) => {
-                    console.error('[3D Avatar] ❌ FBXLoader ERROR:', error);
-                    reject(error);
-                }
-            );
-        });
-
-        return { root: obj, animations: obj.animations || [] };
-    }
-
-    throw new Error(`Desteklenmeyen format: .${ext}. .glb, .gltf veya .fbx kullanın.`);
-};
+let scene, camera, renderer, model, mixer, controls;
+let currentUrl = null;
+let isAutoRotating = false;
 
 const initAvatar3D = async () => {
-    console.log('[3D Avatar] Initialization started...');
-
     const stage = document.getElementById('avatar-stage');
-    if (!stage) {
-        console.error('[3D Avatar] ❌ #avatar-stage element NOT FOUND in DOM!');
+    // Ensure canvas container inside stage
+    let canvasContainer = document.getElementById('avatar-3d-canvas');
+    if (!canvasContainer && stage) {
+        canvasContainer = document.createElement('div');
+        canvasContainer.id = 'avatar-3d-canvas';
+        stage.appendChild(canvasContainer);
+    }
+
+    if (!stage || !canvasContainer) {
+        console.warn('Avatar stage not found.');
         return;
     }
-    console.log('[3D Avatar] ✅ #avatar-stage element found:', stage);
 
-    const canvasHost = document.getElementById('avatar-3d-canvas');
+    // fallback & status elements
     const statusEl = document.getElementById('avatar-3d-status');
-    if (!canvasHost || !statusEl) {
-        console.error('[3D Avatar] ❌ Missing required elements:', { canvasHost, statusEl });
-        return;
-    }
-    console.log('[3D Avatar] ✅ Canvas host and status overlay found');
+    const fallbackEl = document.getElementById('avatar-fallback');
 
-    const modelUrlFromDom = stage.getAttribute('data-model-url') || '';
-    const params = new URLSearchParams(window.location.search);
-    const modelOverride = params.get('avatar') || '';
-    const modelUrl = modelOverride || modelUrlFromDom;
+    // SCENE
+    scene = new THREE.Scene();
+    scene.background = null;
 
-    console.log('[3D Avatar] Model URL resolution:', {
-        fromDomAttribute: modelUrlFromDom,
-        fromQueryParam: modelOverride,
-        finalUrl: modelUrl
-    });
+    // CAMERA (Standard Default Position)
+    const aspect = stage.clientWidth / stage.clientHeight;
+    camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 100);
+    // Optimized for "Full Body Portrait" feel
+    camera.position.set(0, 1.2, 3.2);
 
-    if (!isWebGLAvailable()) {
-        console.error('[3D Avatar] ❌ WebGL NOT available!');
-        setStatus(statusEl, 'WebGL desteklenmiyor. 3D avatar önizleme kapalı.', 'error');
-        return;
-    }
-    console.log('[3D Avatar] ✅ WebGL is available');
-
-    if (!modelUrl) {
-        console.error('[3D Avatar] ❌ No model URL specified!');
-        setStatus(statusEl, '3D avatar modeli tanımlı değil. data-model-url ekleyin veya ?avatar=URL kullanın.', 'error');
-        return;
-    }
-
-    console.log('[3D Avatar] 🚀 Starting model fetch:', modelUrl);
-    setStatus(statusEl, '3D avatar yükleniyor...', 'loading');
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.setClearColor(0x000000, 0);
+    // RENDERER
+    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
+    renderer.setSize(stage.clientWidth, stage.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.outputEncoding = THREE.sRGBEncoding; // Better colors
 
-    canvasHost.innerHTML = '';
-    canvasHost.appendChild(renderer.domElement);
+    canvasContainer.innerHTML = '';
+    canvasContainer.appendChild(renderer.domElement);
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+    // Style canvas
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
+    renderer.domElement.style.display = 'block';
 
-    const controls = new OrbitControls(camera, renderer.domElement);
+    // LIGHTS (Cinematic Setup)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    dirLight.position.set(2, 4, 3);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 1024;
+    dirLight.shadow.mapSize.height = 1024;
+    scene.add(dirLight);
+
+    const backLight = new THREE.DirectionalLight(0xaaccff, 0.5);
+    backLight.position.set(-2, 2, -3);
+    scene.add(backLight);
+
+    // CONTROLS (Strict Requirements)
+    controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.enablePan = false;
-    controls.rotateSpeed = 0.6;
-    controls.minPolarAngle = Math.PI * 0.25;
-    controls.maxPolarAngle = Math.PI * 0.62;
+    controls.dampingFactor = 0.08;
+    controls.enableZoom = false; // LOCKED
+    controls.enablePan = false;  // LOCKED
+    controls.target.set(0, 1.0, 0); // Focus on Torso/Hips
 
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    // Limits
+    controls.minPolarAngle = Math.PI / 3; // Prevent looking from too high
+    controls.maxPolarAngle = Math.PI / 1.5; // Prevent looking from under
+    controls.minDistance = 2.0;
+    controls.maxDistance = 5.0;
 
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x2b2b2b, 0.35));
+    controls.update();
 
-    const key = new THREE.DirectionalLight(0xffffff, 2.0);
-    key.position.set(3.5, 6.0, 3.0);
-    key.castShadow = true;
-    key.shadow.mapSize.set(1024, 1024);
-    key.shadow.normalBias = 0.03;
-    scene.add(key);
+    // INTERACTION: Stop auto-rotation on user touch
+    controls.addEventListener('start', () => {
+        isAutoRotating = false;
+    });
 
-    const fill = new THREE.DirectionalLight(0xffffff, 0.85);
-    fill.position.set(-3.0, 3.0, 2.5);
-    scene.add(fill);
-
-    const rim = new THREE.DirectionalLight(0xffffff, 1.1);
-    rim.position.set(0.0, 4.0, -4.5);
-    scene.add(rim);
-
-    const ground = new THREE.Mesh(
-        new THREE.CircleGeometry(1, 64),
-        new THREE.ShadowMaterial({ opacity: 0.22 })
-    );
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    scene.add(ground);
-
-    let mixer = null;
-
-    try {
-        const loaded = await loadModel(modelUrl);
-        const model = loaded.root;
-        const animations = loaded.animations;
-
-        console.log('[3D Avatar] Model loaded successfully:', {
-            model,
-            animations: animations.length,
-            children: model.children.length
-        });
-
-        prepareModel(model);
-        const { box, size } = centerAndGroundModel(model);
-
-        console.log('[3D Avatar] Model centered and grounded. Size:', size);
-
-        const groundScale = Math.max(size.x, size.z) * 0.75;
-        ground.scale.setScalar(Math.max(0.001, groundScale));
-
-        scene.add(model);
-        fitCameraToBox(camera, controls, box, 1.35);
-
-        if (animations && animations.length > 0) {
-            console.log('[3D Avatar] Playing animation:', animations[0].name);
-            mixer = new THREE.AnimationMixer(model);
-            mixer.clipAction(animations[0]).play();
-        }
-
-        console.log('[3D Avatar] ✅ Adding is-3d-ready class to stage');
-        stage.classList.add('is-3d-ready');
-
-        console.log('[3D Avatar] ✅ Hiding status overlay');
-        statusEl.classList.add('hidden');
-
-        // Explicitly hide SVG layers
-        const svgLayers = stage.querySelectorAll('.avatar-layer');
-        console.log('[3D Avatar] Hiding', svgLayers.length, 'SVG avatar layers');
-        svgLayers.forEach(layer => {
-            layer.style.opacity = '0';
-            layer.style.pointerEvents = 'none';
-        });
-
-        console.log('[3D Avatar] 🎉 3D Avatar viewer successfully activated!');
-    } catch (e) {
-        console.error('[3D Avatar] ❌ LOAD FAILED:', e);
-        const msg = e && e.message ? e.message : 'Bilinmeyen hata';
-        const errorMessage = `3D model yüklenemedi: ${msg}`;
-        setStatus(statusEl, errorMessage, 'error');
-        return;
-    }
-
-    const resize = () => {
-        const rect = stage.getBoundingClientRect();
-        const w = Math.max(1, Math.floor(rect.width));
-        const h = Math.max(1, Math.floor(rect.height));
+    // RESIZE HANDLER
+    const onResize = () => {
+        if (!stage) return;
+        const w = stage.clientWidth;
+        const h = stage.clientHeight;
         renderer.setSize(w, h, false);
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
     };
-
-    resize();
+    window.addEventListener('resize', onResize);
 
     if (window.ResizeObserver) {
-        const ro = new ResizeObserver(() => resize());
+        const ro = new ResizeObserver(onResize);
         ro.observe(stage);
-    } else {
-        window.addEventListener('resize', resize);
     }
 
+    // ANIMATE
     const clock = new THREE.Clock();
     const animate = () => {
-        const dt = clock.getDelta();
-        if (mixer) mixer.update(dt);
+        requestAnimationFrame(animate);
+        const delta = clock.getDelta();
+
+        if (mixer) mixer.update(delta);
+
+        // Auto Rotation Logic (Manual for better control than autoRotate)
+        if (isAutoRotating) {
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 2.0; // Slow & Steady
+        } else {
+            controls.autoRotate = false;
+        }
+
         controls.update();
         renderer.render(scene, camera);
-        requestAnimationFrame(animate);
+    };
+    animate();
+
+    // LISTEN FOR VIEW EVENTS (Front/Back)
+    window.addEventListener('avatar:view', (e) => {
+        const view = e.detail;
+        console.log('[3D View] Switching to:', view);
+        isAutoRotating = false; // Stop rotation
+
+        const dist = 3.2; // Keep consistent distance
+
+        if (view === 'front') {
+            // Smoothly interpolate would be nice, but jump is acceptable for responsiveness
+            // Reset to front +Z
+            camera.position.set(0, 1.2, dist);
+            camera.lookAt(0, 1.0, 0);
+        } else if (view === 'back') {
+            // Move to back -Z
+            camera.position.set(0, 1.2, -dist);
+            camera.lookAt(0, 1.0, 0);
+        }
+
+        controls.update();
+    });
+
+    // LOAD MODEL FUNCTION
+    const loadModel = async (url) => {
+        if (!url) return;
+        if (url === currentUrl && model) return;
+        currentUrl = url;
+
+        // Show Loading
+        if (statusEl) {
+            statusEl.classList.remove('hidden');
+            statusEl.innerHTML = '<div class="spinner"></div><p>Avatar yükleniyor...</p>';
+        }
+        if (fallbackEl) fallbackEl.style.opacity = '1';
+
+        try {
+            const loader = new GLTFLoader();
+            const draco = new DRACOLoader();
+            draco.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+            loader.setDRACOLoader(draco);
+
+            const gltf = await new Promise((resolve, reject) => {
+                loader.load(url, resolve, undefined, reject);
+            });
+
+            if (model) scene.remove(model);
+            model = gltf.scene;
+
+            // Shadows
+            model.traverse(node => {
+                if (node.isMesh) {
+                    node.castShadow = true;
+                    node.receiveShadow = true;
+                }
+            });
+
+            scene.add(model);
+
+            // Animation
+            if (gltf.animations && gltf.animations.length > 0) {
+                mixer = new THREE.AnimationMixer(model);
+                const action = mixer.clipAction(gltf.animations[0]);
+                action.play();
+            }
+
+            // Success State
+            if (statusEl) statusEl.classList.add('hidden');
+
+            // Mark stage as ready (CSS hides fallback)
+            stage.classList.add('is-3d-ready');
+
+            console.log('[3D Avatar] Loaded Successfully');
+
+            // Trigger One-Time Auto-Rotation
+            isAutoRotating = true;
+            setTimeout(() => {
+                isAutoRotating = false;
+            }, 3500); // 3.5s rotation then stop
+
+        } catch (error) {
+            console.error('[3D Avatar] Load Error:', error);
+            if (statusEl) {
+                statusEl.innerHTML = '<p style="color:#ff6b6b">Yükleme Hatası</p>';
+            }
+            stage.classList.remove('is-3d-ready');
+            if (fallbackEl) fallbackEl.style.opacity = '1';
+        }
     };
 
-    requestAnimationFrame(animate);
+    // Initial Load
+    const modelUrl = stage.dataset.modelUrl;
+    if (modelUrl) {
+        loadModel(modelUrl);
+    }
+
+    // Observer and Event Listener for reloads
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach(m => {
+            if (m.type === 'attributes' && m.attributeName === 'data-model-url') {
+                const newUrl = stage.dataset.modelUrl;
+                if (newUrl) loadModel(newUrl);
+            }
+        });
+    });
+    observer.observe(stage, { attributes: true });
+
+    window.addEventListener('avatar:modelChanged', () => {
+        const newUrl = stage.dataset.modelUrl;
+        if (newUrl) loadModel(newUrl);
+    });
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    initAvatar3D();
-});
+document.addEventListener('DOMContentLoaded', initAvatar3D);

@@ -408,7 +408,7 @@ body.sidebar-open .sidebar {
     gap: var(--spacing-xl);
 }
 
-.results > .glass-card {
+.results>.glass-card {
     overflow: hidden;
 }
 
@@ -589,7 +589,7 @@ body.sidebar-open .sidebar {
     padding: 0;
 }
 
-.advanced-details > .advanced-summary {
+.advanced-details>.advanced-summary {
     list-style: none;
     cursor: pointer;
     display: flex;
@@ -601,7 +601,7 @@ body.sidebar-open .sidebar {
     border: 1px solid var(--glass-border);
 }
 
-.advanced-details > .advanced-summary::-webkit-details-marker {
+.advanced-details>.advanced-summary::-webkit-details-marker {
     display: none;
 }
 
@@ -637,14 +637,19 @@ body.sidebar-open .sidebar {
 .skeleton-line {
     height: 12px;
     border-radius: 999px;
-    background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.14), rgba(255,255,255,0.06));
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06));
     background-size: 200% 100%;
     animation: skeletonShimmer 1.2s ease-in-out infinite;
 }
 
 @keyframes skeletonShimmer {
-    0% { background-position: 0% 0%; }
-    100% { background-position: -200% 0%; }
+    0% {
+        background-position: 0% 0%;
+    }
+
+    100% {
+        background-position: -200% 0%;
+    }
 }
 
 .metrics-error {
@@ -1511,9 +1516,9 @@ body.sidebar-open .sidebar {
     height: 100%;
     object-fit: contain;
     will-change: transform, filter, opacity;
-    transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1), 
-                filter 350ms ease, 
-                opacity 300ms ease;
+    transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1),
+        filter 350ms ease,
+        opacity 300ms ease;
     pointer-events: none;
 }
 
@@ -1525,43 +1530,37 @@ body.sidebar-open .sidebar {
 
 .avatar-body {
     transform: translateZ(0px) rotateX(2deg) scale(1.01);
-    filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.4))
-            drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.4)) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
     z-index: 1;
 }
 
 .avatar-bottom {
     transform: translateZ(18px) translateY(3px) scale(1.005);
-    filter: drop-shadow(0 14px 32px rgba(0, 0, 0, 0.35))
-            drop-shadow(0 6px 12px rgba(0, 0, 0, 0.25));
+    filter: drop-shadow(0 14px 32px rgba(0, 0, 0, 0.35)) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.25));
     z-index: 2;
 }
 
 .avatar-top {
     transform: translateZ(28px) translateY(-3px) scale(1.008);
-    filter: drop-shadow(0 18px 38px rgba(0, 0, 0, 0.38))
-            drop-shadow(0 8px 16px rgba(0, 0, 0, 0.28));
+    filter: drop-shadow(0 18px 38px rgba(0, 0, 0, 0.38)) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.28));
     z-index: 3;
 }
 
 .avatar-outerwear {
     transform: translateZ(38px) translateY(-1px) scale(1.012);
-    filter: drop-shadow(0 22px 44px rgba(0, 0, 0, 0.42))
-            drop-shadow(0 10px 20px rgba(0, 0, 0, 0.32));
+    filter: drop-shadow(0 22px 44px rgba(0, 0, 0, 0.42)) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.32));
     z-index: 4;
 }
 
 .avatar-shoes {
     transform: translateZ(24px) translateY(10px) scale(1.006);
-    filter: drop-shadow(0 16px 34px rgba(0, 0, 0, 0.40))
-            drop-shadow(0 6px 14px rgba(0, 0, 0, 0.30));
+    filter: drop-shadow(0 16px 34px rgba(0, 0, 0, 0.40)) drop-shadow(0 6px 14px rgba(0, 0, 0, 0.30));
     z-index: 2;
 }
 
 .avatar-accessory {
     transform: translateZ(45px) translateX(8px) translateY(-5px) scale(1.015);
-    filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.45))
-            drop-shadow(0 12px 24px rgba(0, 0, 0, 0.35));
+    filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.45)) drop-shadow(0 12px 24px rgba(0, 0, 0, 0.35));
     z-index: 5;
 }
 
@@ -1632,9 +1631,9 @@ body.sidebar-open .sidebar {
 
 .pin-card.is-selected {
     border: 2px solid #22c55e;
-    box-shadow: var(--shadow-lg), 
-                0 0 0 4px rgba(34, 197, 94, 0.15),
-                0 0 24px rgba(34, 197, 94, 0.3);
+    box-shadow: var(--shadow-lg),
+        0 0 0 4px rgba(34, 197, 94, 0.15),
+        0 0 24px rgba(34, 197, 94, 0.3);
     transform: translateY(-2px);
 }
 
@@ -1696,9 +1695,9 @@ body.sidebar-open .sidebar {
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.10);
     box-shadow: var(--shadow-md);
-    transition: transform 0.3s ease, 
-                box-shadow 0.3s ease,
-                border-color 0.3s ease;
+    transition: transform 0.3s ease,
+        box-shadow 0.3s ease,
+        border-color 0.3s ease;
     position: relative;
     cursor: pointer;
 }
@@ -1761,7 +1760,7 @@ body.sidebar-open .sidebar {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.00) 0%, rgba(0,0,0,0.18) 55%, rgba(0,0,0,0.40) 100%);
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, rgba(0, 0, 0, 0.18) 55%, rgba(0, 0, 0, 0.40) 100%);
 }
 
 .pin-body {
@@ -1797,7 +1796,7 @@ body.sidebar-open .sidebar {
     padding-top: 10px;
 }
 
-.pieces-details > summary {
+.pieces-details>summary {
     list-style: none;
     cursor: pointer;
     display: flex;
@@ -1809,7 +1808,7 @@ body.sidebar-open .sidebar {
     font-weight: 600;
 }
 
-.pieces-details > summary::-webkit-details-marker {
+.pieces-details>summary::-webkit-details-marker {
     display: none;
 }
 
@@ -2412,126 +2411,408 @@ body.weather-stormy {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-.select-input:focus {
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+/* =========================================
+   STRICT AVATAR PANEL STYLING & 3D CONTROLS
+   ========================================= */
+
+.avatar-panel {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 520px;
+    /* Slight increase for header */
+    padding: 20px;
 }
 
-/* 3D Avatar Customization Modal */
-.rpm-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2000;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
+.avatar-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 16px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.divider-vertical {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 0 4px;
+}
+
+.btn-icon-sm {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.btn-icon-sm:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.avatar-stage {
+    position: relative;
+    width: 100%;
+    height: 480px;
+    /* FIXED DESKTOP HEIGHT AS REQUESTED */
+    background: radial-gradient(circle at center, rgba(60, 60, 60, 0.4) 0%, rgba(0, 0, 0, 0.8) 100%);
+    /* High Contrast */
+    border-radius: 22px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 768px) {
+    .avatar-stage {
+        height: 380px;
+    }
+}
+
+/* 1. LAYERS Z-INDEXING */
+.avatar-fallback {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    opacity: 1;
+}
+
+#avatar-3d-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 2;
+    display: block;
+}
+
+.avatar-3d-status {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    color: white;
+    font-size: 0.9rem;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    z-index: 3;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.avatar-3d-status.hidden {
+    opacity: 0;
+}
+
+.avatar-stage.is-3d-ready .avatar-fallback {
+    opacity: 0;
+}
+
+.avatar-layer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-height: 90%;
+    width: auto;
+    object-fit: contain;
+}
+
+/* =========================================
+   HAMBURGER OVERLAY FIX
+   ========================================= */
+
+/* The sidebar itself */
+#sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    background: rgba(20, 20, 20, 0.95);
+    /* Nearly opaque */
+    backdrop-filter: blur(16px);
+    z-index: 3000;
+    /* Above everything */
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
+}
+
+/* When active, it slides in */
+#sidebar.active {
+    transform: translateX(0);
+}
+
+/* Overlay backdrop */
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 2999;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
 }
 
-.rpm-modal.active {
+body.sidebar-open .sidebar-overlay {
     opacity: 1;
     pointer-events: auto;
 }
 
-.rpm-container {
-    width: 90%;
-    height: 90%;
-    max-width: 1200px;
-    background: #111;
-    border-radius: 20px;
+/* Prevent body scroll when menu open */
+body.sidebar-open {
     overflow: hidden;
-    position: relative;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.rpm-iframe {
+/* Ensure Main Content DOES NOT SQUEEZE */
+.main-content {
+    margin-left: 0 !important;
+    /* Force no margin */
+    width: 100%;
+    transition: none;
+    /* No transition needed as we don't push */
+}
+
+/* =========================================
+   PREMIUM OUTFIT & BOYNER STYLES
+   ========================================= */
+
+.pin-hero {
+    position: relative;
+    min-height: 240px;
+    /* Requested Minimum */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pin-hero img {
     width: 100%;
     height: 100%;
-    border: none;
-    display: block;
+    object-fit: cover;
 }
 
-.rpm-close {
+.btn-shop,
+.shop-icon {
+    /* Ensuring adequate spacing */
+    bottom: 12px;
+    right: 12px;
+}
+
+.avatar-3d-status.hidden {
+    opacity: 0;
+}
+
+/* Helper to hide fallback when 3D is ready */
+.avatar-stage.is-3d-ready .avatar-fallback {
+    opacity: 0;
+}
+
+/* Rest of layers */
+.avatar-layer {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    color: white;
-    font-size: 24px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-height: 90%;
+    width: auto;
+    object-fit: contain;
+}
+
+
+.avatar-preview-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-    transition: all 0.2s;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 12px;
 }
 
-.rpm-close:hover {
-    background: rgba(255, 50, 50, 0.8);
-}
-
-/* Avatar Custom Button */
-.btn-avatar-custom {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    z-index: 10;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 8px 16px;
-    border-radius: 20px;
-    color: white;
-    font-size: 0.9rem;
-    cursor: pointer;
-    backdrop-filter: blur(4px);
+.avatar-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     gap: 8px;
-    transition: all 0.2s;
 }
 
-.btn-avatar-custom:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
+.avatar-stage {
+    position: relative;
+    width: 100%;
+    height: 420px;
+    /* Fixed height for stability */
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.2) 70%);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Boyner Shop Button */
-.btn-shop {
-    display: inline-flex;
+/* Canvas z-index 2 */
+#avatar-3d-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+}
+
+/* Fallback SVG z-index 1 */
+.avatar-fallback {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    background: #f47920; /* Boyner orange approximate */
-    color: white;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+/* Layers inside fallback */
+.avatar-layer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-height: 90%;
+    width: auto;
+    object-fit: contain;
+}
+
+/* Status z-index 3 (Loading/Error) */
+.avatar-3d-status {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    transition: opacity 0.3s ease;
+}
+
+/* 2. Outfit Hero & Titles */
+.pin-card {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.05);
+    /* slightly lighter for contrast */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 22px;
+    overflow: hidden;
+    /* transition details in main css */
+}
+
+.pin-hero {
+    position: relative;
+    min-height: 240px;
+    /* Increased from default */
+    overflow: hidden;
+}
+
+.pin-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+/* Gradient Overlay for Text Readability */
+.pin-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.7) 100%);
+    pointer-events: none;
+}
+
+.pin-title {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+    z-index: 2;
+    font-size: 24px;
+    font-weight: 800;
+    color: #fff;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.1;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.pin-body {
+    padding: 16px;
+}
+
+/* 3. Premium Shop Icon (Boyner) */
+.shop-icon {
+    position: absolute;
+    right: 8px;
+    /* Inside the mini piece card */
+    bottom: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(8px);
+    color: #fff;
     text-decoration: none;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    margin-top: 8px;
-    transition: all 0.2s;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.2s ease;
+    z-index: 5;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.btn-shop:hover {
-    background: #ff8c3a; /* Lighter orange */
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(244, 121, 32, 0.3);
+.shop-icon:hover {
+    background: #f47920;
+    /* Boyner Accent */
+    border-color: #f47920;
+    transform: scale(1.1);
+    box-shadow: 0 6px 12px rgba(244, 121, 32, 0.4);
 }
 
-.btn-shop:disabled, .btn-shop.disabled {
-    background: #555;
-    cursor: not-allowed;
-    opacity: 0.7;
+/* Piece mini styling adjustment to allow absolute icon */
+.piece-mini {
+    position: relative;
+    /* ensure icon positions relative to this */
 }
