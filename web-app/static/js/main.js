@@ -45,8 +45,8 @@ class OutfitApp {
         this.outfitsPlaceholder = document.getElementById('outfits-placeholder');
         this.outfitsGrid = document.getElementById('outfits-grid');
 
-        this.sidebarToggle = document.getElementById('sidebar-toggle');
-        this.drawerBackdrop = document.getElementById('drawer-backdrop');
+        this.sidebarToggle = null; // Removed hamburger functionality
+        this.drawerBackdrop = null; // Removed drawer backdrop
         this.topbarGenerate = document.getElementById('topbar-generate');
 
         this.avatarPieces = document.getElementById('avatar-pieces');
@@ -74,24 +74,129 @@ class OutfitApp {
 
         this.fetchModelMetrics();
 
-        this.applyInitialSidebarState();
+        // Sidebar state management removed - always visible
 
         // Init Avatar Creator
         this.initAvatarCreator();
     }
 
+    is_rainy(weatherData) {
+        if (!weatherData) return false;
+        
+        // Debug logging (dev mode only)
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('Rain Detection Debug:', {
+                precipMM: weatherData.precipMM,
+                weather_main: weatherData.weather_main,
+                rain: weatherData.rain,
+                description: weatherData.description
+            });
+        }
+        
+        // Priority 1: Numeric precipitation (most reliable)
+        const precipMM = parseFloat(weatherData.precipMM) || 0;
+        if (precipMM > 0.1) {
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                console.log('Rain detected by precipitation:', precipMM, 'mm');
+            }
+            return true;
+        }
+        
+        // Priority 2: Weather main field (standardized English)
+        const weatherMain = (weatherData.weather_main || '').toLowerCase();
+        const rainConditions = ['rain', 'drizzle', 'thunderstorm'];
+        if (rainConditions.includes(weatherMain)) {
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                console.log('Rain detected by weather_main:', weatherMain);
+            }
+            return true;
+        }
+        
+        // Priority 3: Description keywords (fallback)
+        const description = (weatherData.description || '').toLowerCase();
+        const rainKeywords = ['rain', 'drizzle', 'shower', 'thunderstorm', 'yağmur', 'yağışlı', 'çisenti'];
+        const hasRainKeyword = rainKeywords.some(keyword => description.includes(keyword));
+        
+        if (hasRainKeyword) {
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                console.log('Rain detected by description:', description);
+            }
+            return true;
+        }
+        
+        return false;
+    }
+
     getCurrentThemeKey() {
+        // Use fresh weather data instead of form values
+        const weatherData = this.weatherData;
         const season = this.seasonSelect?.value || '';
-        const temp = parseFloat(this.tempSlider?.value || '20');
-        const rain = this.rainSelect?.value || 'yok';
         const eventType = this.eventTypeSelect?.value || '';
         const style = this.styleSelect?.value || '';
+        
+        // Get temperature from weather data first, then fallback to slider
+        let temp;
+        if (weatherData && typeof weatherData.temperature === 'number') {
+            temp = weatherData.temperature;
+        } else {
+            temp = parseFloat(this.tempSlider?.value || '20');
+        }
+        
+        // Debug logging (dev mode only)
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('Theme Selection Debug:', { 
+                city: weatherData?.city, 
+                temp, 
+                isRainy: this.is_rainy(weatherData),
+                season, 
+                eventType, 
+                style,
+                weatherData
+            });
+        }
 
-        if (season === 'kış' || temp <= 8) return 'winter';
-        if (season === 'yaz' || temp >= 24) return 'summer';
-        if (rain === 'var') return 'rainy';
-        if (eventType === 'work' || eventType === 'meeting') return 'work';
-        if (style === 'formal' || eventType === 'special' || eventType === 'date') return 'formal';
+        // Priority 1: Rain (highest priority) - use weather data directly
+        if (this.is_rainy(weatherData)) {
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                console.log('Selected: Rainy (rain detected)');
+            }
+            return 'rainy';
+        }
+        
+        // Priority 2: Winter (very cold)
+        if (season === 'kış' || temp <= 6) {
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                console.log('Selected: Winter (cold temp)');
+            }
+            return 'winter';
+        }
+        
+        // Priority 3: Summer (very hot)
+        if (season === 'yaz' || temp >= 26) {
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                console.log('Selected: Summer (hot temp)');
+            }
+            return 'summer';
+        }
+        
+        // Priority 4: Work/Formal events
+        if (eventType === 'work' || eventType === 'meeting') {
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                console.log('Selected: Work (event type)');
+            }
+            return 'work';
+        }
+        if (style === 'formal' || eventType === 'special' || eventType === 'date') {
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                console.log('Selected: Formal (event/style)');
+            }
+            return 'formal';
+        }
+        
+        // Default: Casual
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('Selected: Casual (default)');
+        }
         return 'casual';
     }
 
@@ -207,23 +312,11 @@ class OutfitApp {
             this.topbarGenerate.addEventListener('click', () => this.predict());
         }
 
-        if (this.sidebarToggle) {
-            this.sidebarToggle.addEventListener('click', () => this.toggleSidebar());
-        }
-
-        if (this.drawerBackdrop) {
-            this.drawerBackdrop.addEventListener('click', () => this.closeSidebar());
-        }
-
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                this.closeSidebar();
-            }
-        });
+        // Sidebar toggle functionality removed - sidebar always visible
 
         if (this.modelSelect) {
             this.modelSelect.addEventListener('change', () => {
-                const label = this.modelSelect.options[this.modelSelect.selectedIndex]?.textContent || 'Model';
+                const label = this.modelSelect.options[this.modelstickySelect.selectedIndex]?.textContent || 'Model';
                 this.showToast(`Model: ${label}`, 'info');
             });
         }
@@ -242,6 +335,29 @@ class OutfitApp {
                 this.selectOutfitIndex(idx);
             });
         }
+
+        // Outfit modal event listeners
+        const outfitModal = document.getElementById('outfit-modal');
+        const outfitModalClose = document.getElementById('outfit-modal-close');
+        
+        if (outfitModalClose) {
+            outfitModalClose.addEventListener('click', () => this.closeOutfitModal());
+        }
+        
+        if (outfitModal) {
+            outfitModal.addEventListener('click', (e) => {
+                if (e.target === outfitModal) {
+                    this.closeOutfitModal();
+                }
+            });
+        }
+        
+        // ESC key to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !outfitModal.classList.contains('hidden')) {
+                this.closeOutfitModal();
+            }
+        });
 
         // Start live clock
         this.updateDateTime();
@@ -300,6 +416,9 @@ class OutfitApp {
             const data = await response.json();
 
             if (data.success) {
+                // Clear previous selection to avoid stale state
+                this.selectedOutfitIndex = -1;
+                
                 this.weatherData = data.data;
                 this.activeCity = data.data.city || city;
                 this.displayWeather(data.data);
@@ -311,7 +430,7 @@ class OutfitApp {
                     window.setWeatherBackground(data.data.weather_main);
                 }
 
-                // Update city background image
+                // Update city background
                 this.updateCityBackground(data.data.city, data.data.weather_main, data.data.description);
 
                 // Automatically predict outfit
@@ -577,15 +696,19 @@ class OutfitApp {
                 const reasons = Array.isArray(o.reasons) ? o.reasons : [];
                 const pieces = Array.isArray(o.pieces) ? o.pieces : [];
 
+                // Get theme-specific chips based on slot.key
+                const themeChips = this.getThemeSpecificChips(slot.key);
+                const displayReasons = themeChips.length > 0 ? themeChips : reasons;
+
                 const title = this.escapeHtml(slot.title);
-                const subtitle = this.escapeHtml(this.generateOutfitSubtitle(pieces) || '');
+                const subtitle = this.escapeHtml(this.generateOutfitSubtitle(pieces, slot.key) || '');
                 const accent = slot.accent;
                 const hero = `/static/images/boards/${slot.board}`;
 
                 const isBest = slot.key === currentTheme;
                 const bestBadge = isBest ? `<div class="best-city-badge">Best for Current City</div>` : '';
 
-                const chipsHtml = reasons
+                const chipsHtml = displayReasons
                     .slice(0, 4)
                     .map((r) => `<span class="chip">${this.escapeHtml(r)}</span>`)
                     .join('');
@@ -608,16 +731,16 @@ class OutfitApp {
                                     <div class="piece-mini-meta">
                                         <span class="piece-mini-cat">${category}</span>
                                     </div>
-                                    ${p.shop_link ? `
-                                    <a href="${p.shop_link}" class="shop-icon" target="_blank" rel="noopener" title="Boyner’de Aç" aria-label="Boyner’de Aç">
-                                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M6 6h15l-1.5 9h-12z"></path>
-                                            <path d="M6 6l-2 0"></path>
-                                            <circle cx="9" cy="20" r="1"></circle>
-                                            <circle cx="18" cy="20" r="1"></circle>
-                                        </svg>
-                                    </a>` : ''}
                                 </div>
+                                ${p.shop_link ? `
+                                <button class="shop-icon" onclick="app.openOutfitModal('${label}', '${category}', '${img}', '${p.shop_link}')" title="Boyner'de Gör" aria-label="Boyner'de Gör">
+                                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M6 6h15l-1.5 9h-12z"></path>
+                                        <path d="M6 6l-2 0"></path>
+                                        <circle cx="9" cy="20" r="1"></circle>
+                                        <circle cx="18" cy="20" r="1"></circle>
+                                    </svg>
+                                </button>` : ''}
                             </div>
                         `;
                     })
@@ -632,6 +755,9 @@ class OutfitApp {
                         <div class="pin-body">
                             <div class="pin-title">${title}</div>
                             <div class="pin-subtitle">${subtitle}</div>
+                            <div class="ai-reasons">
+                                ${slot.reasons ? slot.reasons.map(reason => `<div class="ai-reason">• ${reason}</div>`).join('') : ''}
+                            </div>
                             <div class="chip-row">${chipsHtml}</div>
                             <div class="pieces-row">${piecesHtml}</div>
                         </div>
@@ -773,23 +899,7 @@ class OutfitApp {
         }
     }
 
-    applyInitialSidebarState() {
-        const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-        if (isMobile) {
-            document.body.classList.remove('sidebar-open');
-        }
-    }
-
-    toggleSidebar() {
-        document.body.classList.toggle('sidebar-open');
-    }
-
-    closeSidebar() {
-        const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-        if (isMobile) {
-            document.body.classList.remove('sidebar-open');
-        }
-    }
+    // Sidebar methods removed - always visible
 
     defaultBoardImage() {
         return '/static/images/boards/default.svg';
@@ -816,7 +926,7 @@ class OutfitApp {
         }
 
         // deterministic generated placeholder, mirrors backend filename scheme
-        const palette = (this.paletteSelect?.value || 'default');
+        const palette = (this.paletteSelect?.value || 'neutral');
         const slugify = (t) => {
             const map = { 'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u' };
             return String(t)
@@ -828,6 +938,7 @@ class OutfitApp {
         };
 
         const gen = `/static/images/generated/${category}__${slugify(label)}__${slugify(palette)}.svg`;
+        console.log('Generated image URL:', gen, 'for piece:', { category, label, palette });
         return gen;
     }
 
@@ -836,14 +947,154 @@ class OutfitApp {
         return `onerror="this.onerror=null;this.src='${safe}';"`;
     }
 
-    generateOutfitSubtitle(pieces) {
+    openOutfitModal(label, category, img, shopLink) {
+        // Debug: Log call stack
+        console.trace('openOutfitModal called');
+        
+        // Validate required data
+        if (!label || !category || !img) {
+            console.warn('openOutfitModal called with missing data:', { label, category, img, shopLink });
+            return;
+        }
+        
+        const modal = document.getElementById('outfit-modal');
+        const modalImg = document.getElementById('outfit-modal-img');
+        const modalTitle = document.getElementById('outfit-modal-title');
+        const modalDescription = document.getElementById('outfit-modal-description');
+        const modalShopLink = document.getElementById('outfit-modal-shop-link');
+        
+        // Populate modal content
+        modalImg.src = img;
+        modalImg.alt = label;
+        modalTitle.textContent = label;
+        modalDescription.textContent = `${category} - Bu parça mevcut hava koşulları için öneriliyor.`;
+        modalShopLink.href = shopLink || '#';
+        
+        // Update context chips
+        const temp = this.tempSlider ? this.tempSlider.value : '20';
+        const rain = this.rainSelect ? this.rainSelect.value : 'yok';
+        const wind = this.windSelect ? this.windSelect.value : 'zayıf';
+        const season = this.seasonSelect ? this.seasonSelect.value : 'ilkbahar';
+        
+        document.getElementById('outfit-modal-temp').textContent = `${temp}°C`;
+        document.getElementById('outfit-modal-rain').textContent = rain === 'var' ? 'Yağmurlu' : 'Yağmursuz';
+        document.getElementById('outfit-modal-wind').textContent = wind;
+        document.getElementById('outfit-modal-season').textContent = season;
+        
+        // Show modal only after content is populated
+        modal.classList.remove('hidden');
+        modal.setAttribute('aria-hidden', 'false');
+    }
+
+    closeOutfitModal() {
+        const modal = document.getElementById('outfit-modal');
+        modal.classList.add('hidden');
+        modal.setAttribute('aria-hidden', 'true');
+    }
+
+    getThemeSpecificChips(themeKey) {
+        const themeChips = {
+            'winter': [
+                "Soğuk hava için sıcak tutan katmanlar",
+                "Karlı günlerde konforlu kalın kumaşlar",
+                "Rüzgar koruması sağlayan dış giyim",
+                "Kış stilinde şık ve fonksiyonel parçalar"
+            ],
+            'summer': [
+                "Sıcak havada serin tutan hafif parçalar",
+                "Nefes alan pamuk ve linen kumaşlar",
+                "Güneş korumalı açık renkli giyim",
+                "Yaz aylarında modern ve rahat kombinler"
+            ],
+            'rainy': [
+                "Yağışlı hava için suya dayanıklı katmanlar",
+                "Şemsiye ile tamamlanan yağmurlu gün kombini",
+                "Islak zeminde güvenli sağlam bot seçimi",
+                "Yağmurlu havada şık ve kuru kalma"
+            ],
+            'casual': [
+                "Günlük hayatta rahat kot ve tişört kombinleri",
+                "Sokak stilinde modern ve konforlu parçalar",
+                "Arkadaş buluşmaları için şık günlük outfit",
+                "Rahatlık ve tarzı birleştiren casual stil"
+            ],
+            'work': [
+                "İş ortamı için profesyonel gömlek ve pantolon",
+                "Ofis stilinde resmi ve şık görünüm",
+                "Toplantılarda güven veren klasik parçalar",
+                "İş hayatında pratik ve elegant kombin"
+            ],
+            'formal': [
+                "Özel davetler için elegant ceket ve gömlek",
+                "Resmi ortamlarda zarif ve klasik görünüm",
+                "Şık aksesuarlarla tamamlanan formal stil",
+                "Özel günlerde dikkat çeken sofistike kombin"
+            ]
+        };
+        
+        return themeChips[themeKey] || themeChips['casual'];
+    }
+
+    generateOutfitSubtitle(pieces, themeKey = null) {
         if (!Array.isArray(pieces) || pieces.length === 0) {
-            return 'Complete outfit';
+            return this.getThemeSpecificText(themeKey, 'default');
         }
 
         const labels = pieces.slice(0, 3).map(p => p.label || p.category).filter(Boolean);
-        if (labels.length === 0) return 'Stylish combination';
+        if (labels.length === 0) return this.getThemeSpecificText(themeKey, 'default');
 
+        // For themed outfits, use theme-specific text instead of generic labels
+        if (themeKey) {
+            const themeText = this.getThemeSpecificText(themeKey, 'combination', labels);
+            if (themeText) return themeText;
+        }
+
+        return labels.join(' + ');
+    }
+
+    getThemeSpecificText(themeKey, type, labels = []) {
+        const themeTexts = {
+            'winter': {
+                'default': 'Mont + Kazak + Sıcak İç Giyim',
+                'combination': 'Kışlık Kombin - Sıcak ve Şık',
+                'description': 'Soğuk havalarda sizi sıcak tutacak katmanlı giyim'
+            },
+            'summer': {
+                'default': 'Tişört + Şort + Hafif Ayakkabı',
+                'combination': 'Yaz Kombini - Serin ve Rahat',
+                'description': 'Sıcak yaz günlerinde serin kalmanız için hafif parçalar'
+            },
+            'rainy': {
+                'default': 'Yağmurluk + Bot + Şemsiye',
+                'combination': 'Yağmurlu Gün Kombini - Kuru ve Konforlu',
+                'description': 'Yağışlı hava için su geçirmez katman ve şemsiye'
+            },
+            'work': {
+                'default': 'Gömlek + Pantolon + Deri Ayakkabı',
+                'combination': 'İş Kıyafeti - Profesyonel ve Şık',
+                'description': 'İş ortamı için uygun profesyonel parça seçimi'
+            },
+            'casual': {
+                'default': 'Tişört + Kot Pantolon + Sneaker',
+                'combination': 'Günlük Stil - Rahat ve Modern',
+                'description': 'Günlük kullanım için konforlu ve şık kombin'
+            },
+            'formal': {
+                'default': 'Ceket + Gömlek + Klasik Pantolon',
+                'combination': 'Özel Gün Kıyafeti - Elegant ve Zarif',
+                'description': 'Özel davetler için şık ve zarif parçalar'
+            }
+        };
+
+        const theme = themeTexts[themeKey];
+        if (!theme) return labels.join(' + ');
+
+        if (type === 'combination' && labels.length > 0) {
+            return theme.combination;
+        } else if (type === 'default') {
+            return theme.default;
+        }
+        
         return labels.join(' + ');
     }
 
@@ -1246,6 +1497,13 @@ document.head.appendChild(style);
 let app = null;
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Force-hide modal on startup
+    const modal = document.getElementById('outfit-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.setAttribute('aria-hidden', 'true');
+    }
+    
     app = new OutfitApp();
 
     // Auto-fetch weather for first city after short delay
@@ -1253,34 +1511,9 @@ document.addEventListener('DOMContentLoaded', () => {
         app.fetchWeather();
     }, 1000);
 });
-// ===== Premium UI Controls Patch (Front/Back + Sidebar Overlay) =====
+// ===== Premium UI Controls Patch (Front/Back Only) =====
 (function () {
     try {
-        // Sidebar overlay toggle (hamburger)
-        const menuBtn = document.querySelector("#menu-toggle, .menu-toggle, .hamburger, [data-menu-toggle]");
-        const overlay = document.querySelector("#sidebar-overlay, .sidebar-overlay, .overlay");
-        const sidebar = document.querySelector("#sidebar, .sidebar");
-
-        const openMenu = () => {
-            if (overlay) overlay.classList.add("is-open");
-            if (sidebar) sidebar.classList.add("is-open");
-            document.body.classList.add("menu-open");
-        };
-
-        const closeMenu = () => {
-            if (overlay) overlay.classList.remove("is-open");
-            if (sidebar) sidebar.classList.remove("is-open");
-            document.body.classList.remove("menu-open");
-        };
-
-        if (menuBtn) menuBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            if (document.body.classList.contains("menu-open")) closeMenu();
-            else openMenu();
-        });
-
-        if (overlay) overlay.addEventListener("click", closeMenu);
-
         // Avatar Front/Back buttons
         const btnFront = document.querySelector("#btn-avatar-front, [data-avatar-front]");
         const btnBack = document.querySelector("#btn-avatar-back,  [data-avatar-back]");
@@ -1302,3 +1535,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("[UI] Premium controls patch failed:", err);
     }
 })();
+
+
+

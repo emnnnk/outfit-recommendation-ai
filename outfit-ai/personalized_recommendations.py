@@ -327,32 +327,30 @@ def generate_outfit_recommendations(
         if not accessory_img and yagmur == "var":
             accessory_img = _avatar_asset("accessory")
 
-        reasons: List[str] = []
-        # Weather reasons
+        # Smart theme selection based on weather and context
+        themes = ['casual', 'work', 'formal', 'winter', 'summer', 'rainy']
+        
+        # Choose theme intelligently based on conditions
         if yagmur == "var":
-            reasons.append("Yağış ihtimaline karşı suya dayanıklı katman / şemsiye.")
-        if ruzgar == "kuvvetli":
-            reasons.append("Kuvvetli rüzgâr için ekstra katman önerisi.")
-        if sicaklik <= 10:
-            reasons.append("Düşük sıcaklık için sıcak tutan parçalar.")
-        elif sicaklik >= 28:
-            reasons.append("Sıcak havada nefes alan, hafif parçalar.")
-
-        # Event/style/palette reasons
-        if profile.event_type:
-            reasons.append(f"{profile.event_type} için uygun parça seçimi.")
-        if style:
-            reasons.append(f"{style} stile göre dengeli kombin.")
-        if palette:
-            reasons.append(f"{palette} renk paletine uygun alternatifler.")
-
+            current_theme = "rainy"
+        elif sicaklik >= 35:
+            current_theme = "summer"
+        elif sicaklik <= 10:
+            current_theme = "winter"
+        elif profile.event_type and profile.event_type.lower() in ["iş", "work", "ofis"]:
+            current_theme = "work"
+        elif profile.event_type and profile.event_type.lower() in ["davet", "party", "formal"]:
+            current_theme = "formal"
+        else:
+            # Cycle through remaining themes for variety
+            available_themes = [t for t in themes if t not in ["rainy", "winter", "summer", "work", "formal"]]
+            current_theme = available_themes[i % len(available_themes)] if available_themes else "casual"
+        
+        reasons = _get_theme_specific_reasons(current_theme, sicaklik, yagmur, ruzgar, profile, style, palette)
+        
+        # Add fit note if applicable
         if fit_note:
-            reasons.append(fit_note)
-
-        # Keep 2-4 reasons as requested (but allow 5 if BMI note is present).
-        reasons = reasons[:5] if fit_note else reasons[:4]
-        if len(reasons) < 2:
-            reasons = (reasons + ["Gün boyu konfor ve pratik kullanım."])[:2]
+            reasons = reasons[:3] + [fit_note]
 
         title_parts = []
         if style:
@@ -389,3 +387,94 @@ def generate_outfit_recommendations(
         )
 
     return outfits
+
+def _get_theme_specific_reasons(theme_type: str, sicaklik: int, yagmur: str, ruzgar: str, 
+                               profile: UserProfile, style: str, palette: str) -> List[str]:
+    """Generate theme-specific reasons for different outfit types."""
+    
+    theme_reasons = {
+        'winter': [
+            "Soğuk kış günleri için sıcak tutan mont ve katmanlar.",
+            "Karlı havada konfor sağlayan kalın kumaşlar.",
+            "Rüzgarlı kış günlerinde koruyucu dış giyim.",
+            "Kış stilinde şık ve fonksiyonel kombin."
+        ],
+        'summer': [
+            "Dubai gibi sıcak iklimler için ultra hafif ve nefes alan parçalar.",
+            "40°C+ sıcaklıkta serin tutan pamuk ve linen kumaşlar.",
+            "Güneş korumalı açık renkli ve bol kesimli giyim.",
+            "Sıcak çöl havasında modern ve pratik yaz kombinleri."
+        ],
+        'rainy': [
+            "Yağışlı hava için suya dayanıklı katmanlar.",
+            "Şemsiye ile tamamlanan yağmurlu gün kombini.",
+            "Islak zeminde güvenli sağlam bot seçimi.",
+            "Yağmurlu havada şık ve kuru kalma."
+        ],
+        'work': [
+            "İş ortamı için profesyonel gömlek ve pantolon.",
+            "Ofis stilinde resmi ve şık görünüm.",
+            "Toplantılarda güven veren klasik parçalar.",
+            "İş hayatında pratik ve elegant kombin."
+        ],
+        'casual': [
+            "Günlük hayatta rahat kot ve tişört kombini.",
+            "Sokak stilinde modern ve konforlu parçalar.",
+            "Arkadaş buluşmaları için şık günlük outfit.",
+            "Rahatlık ve tarzı birleştiren casual stil."
+        ],
+        'formal': [
+            "Özel davetler için elegant ceket ve gömlek.",
+            "Resmi ortamlarda zarif ve klasik görünüm.",
+            "Şık aksesuarlarla tamamlanan formal stil.",
+            "Özel günlerde dikkat çeken sofistike kombin."
+        ]
+    }
+    
+    # Determine theme based on conditions
+    if yagmur == "var":
+        theme_type = "rainy"
+    elif sicaklik <= 10:
+        theme_type = "winter"
+    elif sicaklik >= 28:
+        theme_type = "summer"
+    elif profile.event_type in ["work", "meeting"]:
+        theme_type = "work"
+    elif profile.event_type in ["special", "date"]:
+        theme_type = "formal"
+    else:
+        theme_type = "casual"
+    
+    # Get theme-specific reasons
+    base_reasons = theme_reasons.get(theme_type, theme_reasons['casual'])
+    
+    # Add some variation based on style and palette
+    final_reasons = base_reasons[:2]  # Start with first 2 theme reasons
+    
+    # Add style-specific reason if different from theme
+    if style and style not in ["casual", "formal", "work"]:
+        style_reasons = {
+            "sporty": "Spor ve dinamik görünüm için hareketli parçalar.",
+            "classic": "Klasik ve zamansız parçalarla elegant stil.",
+            "street": "Sokak modasına uygun modern ve cesur parçalar.",
+            "minimalist": "Sade ve minimalist çizgilerle modern görünüm."
+        }
+        if style in style_reasons:
+            final_reasons.append(style_reasons[style])
+    
+    # Add palette-specific reason
+    if palette:
+        palette_reasons = {
+            "neutral": "Nötr renk paleti ile her ortama uyumlu stil.",
+            "dark": "Koyu renkler ile gizemli ve şık görünüm.",
+            "pastel": "Pastel tonlarla yumuşak ve romantik stil.",
+            "vibrant": "Canlı renkler ile enerjik ve dikkat çekici görünüm."
+        }
+        if palette in palette_reasons:
+            final_reasons.append(palette_reasons[palette])
+    
+    # Ensure we have at least 2-4 reasons
+    if len(final_reasons) < 2:
+        final_reasons.append("Gün boyu konfor ve pratik kullanım.")
+    
+    return final_reasons[:4]

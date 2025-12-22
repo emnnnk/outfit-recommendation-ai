@@ -482,6 +482,31 @@
         </div>
     </div>
 
+    <!-- Kıyafet Görünümü Modal -->
+    <div id="outfit-modal" class="outfit-modal" aria-hidden="true">
+        <div class="outfit-modal-container">
+            <button id="outfit-modal-close" class="outfit-modal-close" aria-label="Close">&times;</button>
+            <div class="outfit-modal-content">
+                <div class="outfit-modal-image">
+                    <img id="outfit-modal-img" src="" alt="">
+                </div>
+                <div class="outfit-modal-info">
+                    <h2 id="outfit-modal-title" class="outfit-modal-title">Kıyafet Görünümü</h2>
+                    <p id="outfit-modal-description" class="outfit-modal-description"></p>
+                    <div class="outfit-modal-chips">
+                        <span id="outfit-modal-temp" class="chip"></span>
+                        <span id="outfit-modal-rain" class="chip"></span>
+                        <span id="outfit-modal-wind" class="chip"></span>
+                        <span id="outfit-modal-season" class="chip"></span>
+                    </div>
+                    <a id="outfit-modal-shop-link" href="#" target="_blank" rel="noopener" class="btn btn-primary">
+                        Boyner'de Aç
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='js/weather-bg.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>

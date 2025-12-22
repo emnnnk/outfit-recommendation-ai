@@ -215,6 +215,6 @@ outfit-ai/models/*.pt
 outfit-ai/train_deep_models.py
 
 # Generated runtime assets
-web-app/static/images/generated/
-web-app/static/models/
+# web-app/static/images/generated/
+# web-app/static/models/
 
